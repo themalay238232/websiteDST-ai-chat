@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowUpRight,
@@ -45,7 +45,7 @@ function scrollToSection(id: string) {
 
 function BrandLogo({ variant = "group", className = "" }: { variant?: "group" | "media"; className?: string }) {
   const src = variant === "media" ? "/assets/logo-dst-marketing-media.png" : "/assets/logo-dst-group.png";
-  const alt = variant === "media" ? "DST Marketing Media" : "DST Group - Dá»‹ch vá»¥ táº­n tÃ¢m - NÃ¢ng táº§m thÆ°Æ¡ng hiá»‡u";
+  const alt = variant === "media" ? "DST Marketing Media" : "DST Group - Dịch vụ tận tâm - Nâng tầm thương hiệu";
 
   return <img className={`brand-logo ${className}`} src={src} alt={alt} loading="eager" decoding="async" />;
 }
@@ -87,11 +87,11 @@ function ContactForm() {
       <input className="hidden-field" name="company_site" tabIndex={-1} autoComplete="off" aria-hidden="true" />
       <div className="form-grid">
         <label>
-          Há» vÃ  tÃªn
-          <input required name="name" placeholder="Nguyá»…n VÄƒn A" />
+          Họ và tên
+          <input required name="name" placeholder="Nguyễn Văn A" />
         </label>
         <label>
-          Sá»‘ Ä‘iá»‡n thoáº¡i
+          Số điện thoại
           <input required name="phone" inputMode="tel" pattern="^[0-9+\\s]{8,15}$" placeholder="0328 247 888" />
         </label>
         <label>
@@ -99,14 +99,14 @@ function ContactForm() {
           <input required name="email" type="email" placeholder="email@doanhnghiep.vn" />
         </label>
         <label>
-          TÃªn doanh nghiá»‡p
-          <input required name="company" placeholder="TÃªn cÃ´ng ty" />
+          Tên doanh nghiệp
+          <input required name="company" placeholder="Tên công ty" />
         </label>
         <label>
-          Dá»‹ch vá»¥ quan tÃ¢m
+          Dịch vụ quan tâm
           <select required name="service" defaultValue="">
             <option value="" disabled>
-              Chá»n dá»‹ch vá»¥
+              Chọn dịch vụ
             </option>
             {quickLinks.map((item) => (
               <option key={item}>{item}</option>
@@ -114,30 +114,30 @@ function ContactForm() {
           </select>
         </label>
         <label>
-          NgÃ¢n sÃ¡ch dá»± kiáº¿n
+          Ngân sách dự kiến
           <select required name="budget" defaultValue="">
             <option value="" disabled>
-              Chá»n khoáº£ng ngÃ¢n sÃ¡ch
+              Chọn khoảng ngân sách
             </option>
-            <option>DÆ°á»›i 20 triá»‡u</option>
-            <option>20 - 50 triá»‡u</option>
-            <option>50 - 100 triá»‡u</option>
-            <option>TrÃªn 100 triá»‡u</option>
+            <option>Dưới 20 triệu</option>
+            <option>20 - 50 triệu</option>
+            <option>50 - 100 triệu</option>
+            <option>Trên 100 triệu</option>
           </select>
         </label>
       </div>
       <label>
-        Ná»™i dung cáº§n tÆ° váº¥n
-        <textarea required name="message" rows={5} placeholder="Chia sáº» má»¥c tiÃªu, ngÃ nh hÃ ng vÃ  thá»i gian mong muá»‘n..." />
+        Nội dung cần tư vấn
+        <textarea required name="message" rows={5} placeholder="Chia sẻ mục tiêu, ngành hàng và thời gian mong muốn..." />
       </label>
       <label className="policy">
         <input required type="checkbox" />
-        TÃ´i Ä‘á»“ng Ã½ Ä‘á»ƒ DST Group liÃªn há»‡ tÆ° váº¥n vÃ  xá»­ lÃ½ thÃ´ng tin theo chÃ­nh sÃ¡ch báº£o máº­t.
+        Tôi đồng ý để DST Group liên hệ tư vấn và xử lý thông tin theo chính sách bảo mật.
       </label>
-      <button className="primary-btn wide" type="submit" aria-label="Gá»­i yÃªu cáº§u tÆ° váº¥n">
-        Gá»­i yÃªu cáº§u tÆ° váº¥n <Send size={18} />
+      <button className="primary-btn wide" type="submit" aria-label="Gửi yêu cầu tư vấn">
+        Gửi yêu cầu tư vấn <Send size={18} />
       </button>
-      {sent ? <p className="success-message">Cáº£m Æ¡n báº¡n. DST Group sáº½ liÃªn há»‡ tÆ° váº¥n trong thá»i gian sá»›m nháº¥t.</p> : null}
+      {sent ? <p className="success-message">Cảm ơn bạn. DST Group sẽ liên hệ tư vấn trong thời gian sớm nhất.</p> : null}
     </form>
   );
 }
@@ -170,16 +170,16 @@ function ServiceDetailModal({
 
   return (
     <div className="service-modal" role="dialog" aria-modal="true" aria-labelledby="service-modal-title">
-      <button className="modal-backdrop" onClick={onClose} aria-label="ÄÃ³ng chi tiáº¿t dá»‹ch vá»¥" />
+      <button className="modal-backdrop" onClick={onClose} aria-label="Đóng chi tiết dịch vụ" />
       <article className="service-modal-card">
-        <button className="modal-close" onClick={onClose} aria-label="ÄÃ³ng chi tiáº¿t dá»‹ch vá»¥">
+        <button className="modal-close" onClick={onClose} aria-label="Đóng chi tiết dịch vụ">
           <X size={20} />
         </button>
         <div className="modal-intro">
           <div className="modal-icon">
             <Icon size={30} />
           </div>
-          <p className="eyebrow">Chi tiáº¿t dá»‹ch vá»¥</p>
+          <p className="eyebrow">Chi tiết dịch vụ</p>
           <h2 id="service-modal-title">{service.title}</h2>
           <p>{service.detail}</p>
         </div>
@@ -193,11 +193,11 @@ function ServiceDetailModal({
 
           <div className="modal-detail-grid">
             <section>
-              <h3>PhÃ¹ há»£p vá»›i</h3>
+              <h3>Phù hợp với</h3>
               <p>{service.fit}</p>
             </section>
             <section>
-              <h3>Háº¡ng má»¥c bÃ n giao</h3>
+              <h3>Hạng mục bàn giao</h3>
               <ul>
                 {service.deliverables.map((item) => (
                   <li key={item}>
@@ -217,10 +217,10 @@ function ServiceDetailModal({
               scrollToSection("contact");
             }}
           >
-            TÆ° váº¥n dá»‹ch vá»¥ nÃ y <ChevronRight size={18} />
+            Tư vấn dịch vụ này <ChevronRight size={18} />
           </button>
           <button className="ghost-btn" onClick={onClose}>
-            Xem dá»‹ch vá»¥ khÃ¡c
+            Xem dịch vụ khác
           </button>
         </div>
       </article>
@@ -302,14 +302,14 @@ export function DstLanding() {
     <>
       <div className={`loader ${loaded ? "loader-done" : ""}`} aria-hidden={loaded}>
         <BrandLogo />
-        <span>Dá»‹ch vá»¥ táº­n tÃ¢m - NÃ¢ng táº§m thÆ°Æ¡ng hiá»‡u</span>
+        <span>Dịch vụ tận tâm - Nâng tầm thương hiệu</span>
       </div>
 
       <header className="site-header">
-        <button className="brand" onClick={() => scrollToSection("home")} aria-label="Vá» Ä‘áº§u trang">
+        <button className="brand" onClick={() => scrollToSection("home")} aria-label="Về đầu trang">
           <BrandLogo />
         </button>
-        <nav className="desktop-nav" aria-label="Menu chÃ­nh">
+        <nav className="desktop-nav" aria-label="Menu chính">
           {navItems.map(([label, id]) => (
             <button key={id} onClick={() => scrollToSection(id)}>
               {label}
@@ -317,15 +317,15 @@ export function DstLanding() {
           ))}
         </nav>
         <button className="header-cta" onClick={() => scrollToSection("contact")}>
-          Nháº­n tÆ° váº¥n
+          Nhận tư vấn
         </button>
-        <button className="menu-btn" onClick={() => setMenuOpen(true)} aria-label="Má»Ÿ menu">
+        <button className="menu-btn" onClick={() => setMenuOpen(true)} aria-label="Mở menu">
           <Menu />
         </button>
       </header>
 
       <div className={`mobile-panel ${menuOpen ? "open" : ""}`} aria-hidden={!menuOpen}>
-        <button className="close-btn" onClick={() => setMenuOpen(false)} aria-label="ÄÃ³ng menu">
+        <button className="close-btn" onClick={() => setMenuOpen(false)} aria-label="Đóng menu">
           <X />
         </button>
         {navItems.map(([label, id]) => (
@@ -345,35 +345,35 @@ export function DstLanding() {
         <section id="home" className="hero-section">
           <div className="ambient-grid" />
           <div className="hero-copy reveal">
-            <p className="eyebrow">MARKETING â€¢ MEDIA â€¢ BRANDING</p>
+            <p className="eyebrow">MARKETING • MEDIA • BRANDING</p>
             <h1>
-              Marketing Ä‘Ãºng hÆ°á»›ng, thÆ°Æ¡ng hiá»‡u <span>tÄƒng trÆ°á»Ÿng</span>
+              Marketing đúng hướng, thương hiệu <span>tăng trưởng</span>
             </h1>
             <p className="hero-desc">
-              DST Group Ä‘á»“ng hÃ nh cÃ¹ng doanh nghiá»‡p tá»« chiáº¿n lÆ°á»£c, ná»™i dung, quáº£ng cÃ¡o Ä‘áº¿n Media vÃ  Branding. Má»—i káº¿ hoáº¡ch
-              Ä‘Æ°á»£c triá»ƒn khai rÃµ rÃ ng, Ä‘o lÆ°á»ng minh báº¡ch vÃ  tá»‘i Æ°u liÃªn tá»¥c.
+              DST Group đồng hành cùng doanh nghiệp từ chiến lược, nội dung, quảng cáo đến Media và Branding. Mỗi kế hoạch
+              được triển khai rõ ràng, đo lường minh bạch và tối ưu liên tục.
             </p>
             <div className="hero-actions">
               <button className="primary-btn" onClick={() => scrollToSection("services")}>
-                KhÃ¡m phÃ¡ dá»‹ch vá»¥ <ChevronRight size={18} />
+                Khám phá dịch vụ <ChevronRight size={18} />
               </button>
               <button className="ghost-btn" onClick={() => scrollToSection("contact")}>
-                Nháº­n tÆ° váº¥n miá»…n phÃ­
+                Nhận tư vấn miễn phí
               </button>
             </div>
             <div className="hero-metrics">
               <span>
-                <Zap size={18} /> ADS â€¢ TIKTOK SHOP â€¢ DESIGN â€¢ MEDIA â€¢ CONTENT â€¢ BRANDING
+                <Zap size={18} /> ADS • TIKTOK SHOP • DESIGN • MEDIA • CONTENT • BRANDING
               </span>
             </div>
           </div>
           <HeroScene />
-          <button className="scroll-cue" onClick={() => scrollToSection("about")} aria-label="Cuá»™n xuá»‘ng pháº§n giá»›i thiá»‡u">
+          <button className="scroll-cue" onClick={() => scrollToSection("about")} aria-label="Cuộn xuống phần giới thiệu">
             <Mouse size={18} />
           </button>
         </section>
 
-        <section className="marquee-strip" aria-label="NÄƒng lá»±c ná»•i báº­t">
+        <section className="marquee-strip" aria-label="Năng lực nổi bật">
           <div>
             {[...marqueeItems, ...marqueeItems].map((item, index) => (
               <span key={`${item}-${index}`}>{item}</span>
@@ -383,17 +383,17 @@ export function DstLanding() {
 
         <section id="about" className="section split-section">
           <div className="media-panel reveal">
-            <img src="/assets/01-team-event-launch.jpg" alt="Äá»™i ngÅ© DST trong má»™t sá»± kiá»‡n ra máº¯t" loading="lazy" decoding="async" />
+            <img src="/assets/01-team-event-launch.jpg" alt="Đội ngũ DST trong một sự kiện ra mắt" loading="lazy" decoding="async" />
             <div className="media-badge">
-              <UsersIcon size={20} /> Chiáº¿n lÆ°á»£c rÃµ rÃ ng â€¢ Triá»ƒn khai minh báº¡ch
+              <UsersIcon size={20} /> Chiến lược rõ ràng • Triển khai minh bạch
             </div>
           </div>
           <div className="section-copy reveal">
-            <p className="eyebrow">Vá» chÃºng tÃ´i</p>
-            <h2>XÃ¢y dá»±ng giÃ¡ trá»‹ thÆ°Æ¡ng hiá»‡u bá»n vá»¯ng</h2>
+            <p className="eyebrow">Về chúng tôi</p>
+            <h2>Xây dựng giá trị thương hiệu bền vững</h2>
             <p>
-              DST Group lÃ  Ä‘Æ¡n vá»‹ cung cáº¥p giáº£i phÃ¡p Marketing vÃ  Media toÃ n diá»‡n, Ä‘á»“ng hÃ nh cÃ¹ng doanh nghiá»‡p trong quÃ¡
-              trÃ¬nh tiáº¿p cáº­n khÃ¡ch hÃ ng, xÃ¢y dá»±ng hÃ¬nh áº£nh vÃ  phÃ¡t triá»ƒn kinh doanh.
+              DST Group là đơn vị cung cấp giải pháp Marketing và Media toàn diện, đồng hành cùng doanh nghiệp trong quá
+              trình tiếp cận khách hàng, xây dựng hình ảnh và phát triển kinh doanh.
             </p>
             <div className="stats-grid">
               {stats.map((item) => (
@@ -403,17 +403,17 @@ export function DstLanding() {
                 </div>
               ))}
             </div>
-            <p className="highlight-line">Dá»‹ch vá»¥ táº­n tÃ¢m - NÃ¢ng táº§m thÆ°Æ¡ng hiá»‡u</p>
+            <p className="highlight-line">Dịch vụ tận tâm - Nâng tầm thương hiệu</p>
           </div>
         </section>
 
         <section id="services" className="section">
           <div className="section-heading reveal">
-            <p className="eyebrow">Há»‡ sinh thÃ¡i dá»‹ch vá»¥</p>
-            <h2>Giáº£i phÃ¡p toÃ n diá»‡n</h2>
+            <p className="eyebrow">Hệ sinh thái dịch vụ</p>
+            <h2>Giải pháp toàn diện</h2>
             <p>
-              Tá»« chiáº¿n lÆ°á»£c Ä‘áº¿n thá»±c thi, DST Group cung cáº¥p Ä‘áº§y Ä‘á»§ giáº£i phÃ¡p giÃºp doanh nghiá»‡p xÃ¢y dá»±ng thÆ°Æ¡ng hiá»‡u vÃ 
-              tÄƒng trÆ°á»Ÿng doanh thu.
+              Từ chiến lược đến thực thi, DST Group cung cấp đầy đủ giải pháp giúp doanh nghiệp xây dựng thương hiệu và
+              tăng trưởng doanh thu.
             </p>
           </div>
           <div className="service-grid">
@@ -447,11 +447,11 @@ export function DstLanding() {
         <section className="package-section">
           <div className="package-inner reveal">
             <div>
-              <p className="eyebrow dark">Giáº£i phÃ¡p trá»n gÃ³i</p>
-              <h2>Má»™t Ä‘á»™i Marketing chuyÃªn nghiá»‡p, chi phÃ­ tá»‘i Æ°u</h2>
+              <p className="eyebrow dark">Giải pháp trọn gói</p>
+              <h2>Một đội Marketing chuyên nghiệp, chi phí tối ưu</h2>
             </div>
             <button className="dark-btn" onClick={() => scrollToSection("contact")}>
-              YÃªu cáº§u bÃ¡o giÃ¡
+              Yêu cầu báo giá
             </button>
           </div>
           <div className="package-grid">
@@ -474,8 +474,8 @@ export function DstLanding() {
 
         <section id="process" className="section process-section">
           <div className="section-heading reveal">
-            <p className="eyebrow">Quy trÃ¬nh lÃ m viá»‡c</p>
-            <h2>RÃµ rÃ ng vÃ  minh báº¡ch</h2>
+            <p className="eyebrow">Quy trình làm việc</p>
+            <h2>Rõ ràng và minh bạch</h2>
           </div>
           <div className="process-list">
             <div className="timeline-line">
@@ -493,8 +493,8 @@ export function DstLanding() {
 
         <section className="section reasons-section">
           <div className="section-heading reveal">
-            <p className="eyebrow">Táº¡i sao chá»n DST Group</p>
-            <h2>Äá»‘i tÃ¡c tÄƒng trÆ°á»Ÿng Ä‘Ã¡ng tin cáº­y</h2>
+            <p className="eyebrow">Tại sao chọn DST Group</p>
+            <h2>Đối tác tăng trưởng đáng tin cậy</h2>
           </div>
           <div className="reason-grid">
             {reasons.map((reason) => (
@@ -508,8 +508,8 @@ export function DstLanding() {
 
         <section id="projects" className="section project-section">
           <div className="section-heading reveal">
-            <p className="eyebrow">Dá»± Ã¡n tiÃªu biá»ƒu</p>
-            <h2>Dáº¥u áº¥n triá»ƒn khai</h2>
+            <p className="eyebrow">Dự án tiêu biểu</p>
+            <h2>Dấu ấn triển khai</h2>
           </div>
           <div className="project-rail">
             {projects.map((project) => (
@@ -528,8 +528,8 @@ export function DstLanding() {
 
         <section id="clients" className="section clients-section">
           <div className="section-heading reveal">
-            <p className="eyebrow">Äá»‘i tÃ¡c vÃ  khÃ¡ch hÃ ng</p>
-            <h2>ÄÆ°á»£c doanh nghiá»‡p tin tÆ°á»Ÿng</h2>
+            <p className="eyebrow">Đối tác và khách hàng</p>
+            <h2>Được doanh nghiệp tin tưởng</h2>
           </div>
           <div className="logo-cloud reveal">
             {[...clientLogos, ...clientLogos].map((logo, index) => (
@@ -556,17 +556,17 @@ export function DstLanding() {
         <section className="final-cta">
           <div className="cta-content reveal">
             <p className="eyebrow">DST Group Marketing & Media</p>
-            <h2>Sáºµn sÃ ng nÃ¢ng táº§m thÆ°Æ¡ng hiá»‡u?</h2>
+            <h2>Sẵn sàng nâng tầm thương hiệu?</h2>
             <p>
-              HÃ£y chia sáº» má»¥c tiÃªu cá»§a báº¡n. Äá»™i ngÅ© DST Group sáº½ tÆ° váº¥n giáº£i phÃ¡p phÃ¹ há»£p vÃ  xÃ¢y dá»±ng káº¿ hoáº¡ch triá»ƒn khai
-              cá»¥ thá»ƒ.
+              Hãy chia sẻ mục tiêu của bạn. Đội ngũ DST Group sẽ tư vấn giải pháp phù hợp và xây dựng kế hoạch triển khai
+              cụ thể.
             </p>
             <div className="hero-actions">
               <button className="primary-btn" onClick={() => scrollToSection("contact")}>
-                Nháº­n tÆ° váº¥n miá»…n phÃ­
+                Nhận tư vấn miễn phí
               </button>
               <a className="ghost-btn" href="tel:0328247888">
-                LiÃªn há»‡ ngay
+                Liên hệ ngay
               </a>
             </div>
           </div>
@@ -577,12 +577,12 @@ export function DstLanding() {
 
         <section id="contact" className="section contact-section">
           <div className="contact-info reveal">
-            <p className="eyebrow">LiÃªn há»‡</p>
-            <h2>Nháº­n tÆ° váº¥n chiáº¿n lÆ°á»£c</h2>
+            <p className="eyebrow">Liên hệ</p>
+            <h2>Nhận tư vấn chiến lược</h2>
             <p>
-              CÃ´ng ty Cá»• pháº§n Táº­p ÄoÃ n DST
+              Công ty Cổ phần Tập Đoàn DST
               <br />
-              Äá»‹a chá»‰: Háº¡ Long, Quáº£ng Ninh
+              Địa chỉ: Hạ Long, Quảng Ninh
             </p>
             <a href="tel:0328247888">
               <Phone size={18} /> 0328 247 888
@@ -603,7 +603,7 @@ export function DstLanding() {
       <footer className="site-footer">
         <div>
           <BrandLogo variant="media" />
-          <p>Dá»‹ch vá»¥ táº­n tÃ¢m - NÃ¢ng táº§m thÆ°Æ¡ng hiá»‡u.</p>
+          <p>Dịch vụ tận tâm - Nâng tầm thương hiệu.</p>
         </div>
         <div>
           <h3>Menu nhanh</h3>
@@ -614,32 +614,32 @@ export function DstLanding() {
           ))}
         </div>
         <div>
-          <h3>Dá»‹ch vá»¥</h3>
+          <h3>Dịch vụ</h3>
           {quickLinks.map((link) => (
             <span key={link}>{link}</span>
           ))}
         </div>
         <div>
-          <h3>Káº¿t ná»‘i</h3>
-          <a href="tel:0328247888">Äiá»‡n thoáº¡i</a>
+          <h3>Kết nối</h3>
+          <a href="tel:0328247888">Điện thoại</a>
           <a href="mailto:info@dstgroup.vn">Email</a>
           <a href="https://dstgroup.vn" target="_blank" rel="noreferrer">
             Website
           </a>
-          <span>Facebook â€¢ TikTok â€¢ YouTube â€¢ Zalo</span>
+          <span>Facebook • TikTok • YouTube • Zalo</span>
         </div>
-        <p className="copyright">Â© DST Group. Dá»‹ch vá»¥ táº­n tÃ¢m - NÃ¢ng táº§m thÆ°Æ¡ng hiá»‡u.</p>
+        <p className="copyright">© DST Group. Dịch vụ tận tâm - Nâng tầm thương hiệu.</p>
       </footer>
 
       <div className="floating-actions">
-        <a href="tel:0328247888" aria-label="Gá»i DST Group">
+        <a href="tel:0328247888" aria-label="Gọi DST Group">
           <Phone size={20} />
         </a>
-        <a href="https://zalo.me/0328247888" aria-label="LiÃªn há»‡ Zalo DST Group">
+        <a href="https://zalo.me/0328247888" aria-label="Liên hệ Zalo DST Group">
           Zalo
         </a>
-        <button onClick={() => scrollToSection("home")} aria-label="Quay láº¡i Ä‘áº§u trang">
-          â†‘
+        <button onClick={() => scrollToSection("home")} aria-label="Quay lại đầu trang">
+          ↑
         </button>
       </div>
     </>
