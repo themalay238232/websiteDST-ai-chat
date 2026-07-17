@@ -7,15 +7,12 @@ import {
   Menu,
   Mouse,
   Phone,
-  Play,
   Send,
   Star,
   X,
   Zap,
 } from "lucide-react";
-import Image from "next/image";
 import { FormEvent, MouseEvent, useEffect, useRef, useState } from "react";
-import * as THREE from "three";
 import {
   CheckIcon,
   clientLogos,
@@ -29,7 +26,6 @@ import {
   stats,
   testimonials,
   UsersIcon,
-  VideoIcon,
 } from "./site-data";
 
 const marqueeItems = [
@@ -45,6 +41,13 @@ function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function BrandLogo({ variant = "group", className = "" }: { variant?: "group" | "media"; className?: string }) {
+  const src = variant === "media" ? "/assets/logo-dst-marketing-media.png" : "/assets/logo-dst-group.png";
+  const alt = variant === "media" ? "DST Marketing Media" : "DST Group - Dịch vụ tận tâm - Nâng tầm thương hiệu";
+
+  return <img className={`brand-logo ${className}`} src={src} alt={alt} loading="eager" decoding="async" />;
+}
+
 function HeroScene() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sceneRef = useRef<HTMLDivElement | null>(null);
@@ -54,125 +57,129 @@ function HeroScene() {
     const shell = sceneRef.current;
     if (!canvas || !shell) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-    camera.position.set(0, 0, 8);
+    let disposed = false;
+    let disposeScene = () => {};
 
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+    async function mountScene() {
+      const THREE = await import("three");
+      if (disposed) return;
 
-    const group = new THREE.Group();
-    scene.add(group);
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+      camera.position.set(0, 0, 7.5);
 
-    const gold = new THREE.MeshStandardMaterial({
-      color: "#e9a037",
-      metalness: 0.62,
-      roughness: 0.22,
-      emissive: "#2d1703",
-    });
-    const teal = new THREE.MeshStandardMaterial({
-      color: "#31585b",
-      metalness: 0.45,
-      roughness: 0.28,
-      emissive: "#071516",
-    });
-    const lineMaterial = new THREE.LineBasicMaterial({ color: "#e9a037", transparent: true, opacity: 0.45 });
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
 
-    const torus = new THREE.Mesh(new THREE.TorusGeometry(2.25, 0.015, 12, 160), gold);
-    const orbit = new THREE.Mesh(new THREE.TorusGeometry(3.05, 0.01, 12, 160), teal);
-    orbit.rotation.x = Math.PI / 2.7;
-    group.add(torus, orbit);
+      const group = new THREE.Group();
+      scene.add(group);
 
-    const cube = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.52, 0.52), gold);
-    cube.position.set(-2.7, 1.5, 0.2);
-    const octa = new THREE.Mesh(new THREE.OctahedronGeometry(0.48), teal);
-    octa.position.set(2.45, -1.45, 0.4);
-    const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.34, 0.08, 80, 8), gold);
-    knot.position.set(2.5, 1.35, -0.4);
-    group.add(cube, octa, knot);
+      const gold = new THREE.MeshStandardMaterial({
+        color: "#E09840",
+        metalness: 0.42,
+        roughness: 0.36,
+        emissive: "#4c2606",
+        emissiveIntensity: 0.3,
+      });
+      const teal = new THREE.MeshStandardMaterial({
+        color: "#305858",
+        metalness: 0.28,
+        roughness: 0.42,
+        emissive: "#0c2221",
+        emissiveIntensity: 0.25,
+      });
 
-    const points: THREE.Vector3[] = [];
-    for (let i = 0; i < 90; i += 1) {
-      const angle = i * 0.45;
-      const radius = 1.7 + (i % 12) * 0.13;
-      points.push(new THREE.Vector3(Math.cos(angle) * radius, Math.sin(angle) * radius, Math.sin(i) * 0.45));
-    }
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    scene.add(new THREE.Line(geometry, lineMaterial));
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(2.35, 0.018, 8, 96), gold);
+      const orbit = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.01, 8, 96), teal);
+      orbit.rotation.x = Math.PI / 2.6;
+      group.add(ring, orbit);
 
-    const particlesGeometry = new THREE.BufferGeometry();
-    const particlePositions = new Float32Array(190 * 3);
-    for (let i = 0; i < particlePositions.length; i += 3) {
-      particlePositions[i] = (Math.random() - 0.5) * 7;
-      particlePositions[i + 1] = (Math.random() - 0.5) * 5;
-      particlePositions[i + 2] = (Math.random() - 0.5) * 3;
-    }
-    particlesGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
-    const particles = new THREE.Points(
-      particlesGeometry,
-      new THREE.PointsMaterial({ color: "#f6c66b", size: 0.025, transparent: true, opacity: 0.75 }),
-    );
-    scene.add(particles);
+      const cube = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.45), gold);
+      cube.position.set(-2.45, 1.3, 0.1);
+      const octa = new THREE.Mesh(new THREE.OctahedronGeometry(0.4), teal);
+      octa.position.set(2.35, -1.2, 0.3);
+      group.add(cube, octa);
 
-    scene.add(new THREE.AmbientLight("#f5f5f3", 0.5));
-    const key = new THREE.PointLight("#e9a037", 6, 12);
-    key.position.set(-1.5, 2.5, 3);
-    scene.add(key);
-    const rim = new THREE.PointLight("#76a0a3", 4, 10);
-    rim.position.set(3, -1, 3);
-    scene.add(rim);
-
-    const resize = () => {
-      const { width, height } = shell.getBoundingClientRect();
-      renderer.setSize(width, height, false);
-      camera.aspect = width / Math.max(height, 1);
-      camera.updateProjectionMatrix();
-    };
-
-    const pointer = { x: 0, y: 0 };
-    const onMove = (event: PointerEvent) => {
-      const rect = shell.getBoundingClientRect();
-      pointer.x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-      pointer.y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-    };
-
-    let frame = 0;
-    const animate = () => {
-      frame = requestAnimationFrame(animate);
-      if (!reduced) {
-        group.rotation.y += 0.004;
-        group.rotation.x += (pointer.y * 0.18 - group.rotation.x) * 0.04;
-        group.rotation.z += (pointer.x * 0.11 - group.rotation.z) * 0.04;
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.008;
-        octa.rotation.y -= 0.009;
-        knot.rotation.x += 0.012;
-        particles.rotation.y += 0.0015;
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particlePositions = new Float32Array(70 * 3);
+      for (let i = 0; i < particlePositions.length; i += 3) {
+        particlePositions[i] = (Math.random() - 0.5) * 6.6;
+        particlePositions[i + 1] = (Math.random() - 0.5) * 4.3;
+        particlePositions[i + 2] = (Math.random() - 0.5) * 2.4;
       }
-      renderer.render(scene, camera);
-    };
+      particlesGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+      const particles = new THREE.Points(
+        particlesGeometry,
+        new THREE.PointsMaterial({ color: "#E8A040", size: 0.024, transparent: true, opacity: 0.62 }),
+      );
+      scene.add(particles);
 
-    resize();
-    animate();
-    window.addEventListener("resize", resize);
-    shell.addEventListener("pointermove", onMove);
+      scene.add(new THREE.AmbientLight("#fff7ea", 0.58));
+      const key = new THREE.PointLight("#E09840", 4.2, 10);
+      key.position.set(-1.2, 2.2, 3);
+      scene.add(key);
+      const rim = new THREE.PointLight("#305858", 2.6, 10);
+      rim.position.set(3, -1, 3);
+      scene.add(rim);
+
+      const pointer = { x: 0, y: 0 };
+      const resize = () => {
+        const { width, height } = shell.getBoundingClientRect();
+        renderer.setSize(width, height, false);
+        camera.aspect = width / Math.max(height, 1);
+        camera.updateProjectionMatrix();
+      };
+      const onMove = (event: PointerEvent) => {
+        const rect = shell.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+        pointer.y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+      };
+
+      let frame = 0;
+      let last = 0;
+      const animate = (time: number) => {
+        frame = requestAnimationFrame(animate);
+        if (time - last < 33) return;
+        last = time;
+        if (!reduced) {
+          group.rotation.y += 0.003;
+          group.rotation.x += (pointer.y * 0.1 - group.rotation.x) * 0.035;
+          group.rotation.z += (pointer.x * 0.08 - group.rotation.z) * 0.035;
+          cube.rotation.x += 0.008;
+          octa.rotation.y -= 0.007;
+          particles.rotation.y += 0.001;
+        }
+        renderer.render(scene, camera);
+      };
+
+      resize();
+      animate(0);
+      window.addEventListener("resize", resize);
+      shell.addEventListener("pointermove", onMove);
+
+      disposeScene = () => {
+        cancelAnimationFrame(frame);
+        window.removeEventListener("resize", resize);
+        shell.removeEventListener("pointermove", onMove);
+        renderer.dispose();
+        particlesGeometry.dispose();
+      };
+    }
+
+    mountScene();
 
     return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", resize);
-      shell.removeEventListener("pointermove", onMove);
-      renderer.dispose();
-      geometry.dispose();
-      particlesGeometry.dispose();
+      disposed = true;
+      disposeScene();
     };
   }, []);
 
   return (
-    <div className="hero-visual" ref={sceneRef} aria-label="Logo DST trong không gian 3D">
+    <div className="hero-visual" ref={sceneRef} aria-label="Logo DST trong không gian nhận diện">
       <canvas ref={canvasRef} />
       <div className="logo-orb">
-        <Image src="/assets/logo-dst-marketing-media.png" alt="DST Marketing Media" width={520} height={292} priority />
+        <BrandLogo variant="media" />
       </div>
       <div className="orbit-label orbit-label-top">ADS</div>
       <div className="orbit-label orbit-label-bottom">BRANDING</div>
@@ -262,77 +269,47 @@ export function DstLanding() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const loadTimer = window.setTimeout(() => setLoaded(true), 900);
-
-    let lenis: { raf: (time: number) => void; destroy: () => void } | undefined;
-    let rafId = 0;
+    const loadTimer = window.setTimeout(() => setLoaded(true), 550);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    async function bootMotion() {
-      if (!reduced) {
-        const Lenis = (await import("lenis")).default;
-        lenis = new Lenis({ duration: 1.15, smoothWheel: true });
-        const raf = (time: number) => {
-          lenis?.raf(time);
-          rafId = requestAnimationFrame(raf);
-        };
-        rafId = requestAnimationFrame(raf);
-      }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.14 },
+    );
+    document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
 
-      const gsapModule = await import("gsap");
-      const scrollModule = await import("gsap/ScrollTrigger");
-      const gsap = gsapModule.gsap;
-      gsap.registerPlugin(scrollModule.ScrollTrigger);
-
-      gsap.utils.toArray<HTMLElement>(".reveal").forEach((element) => {
-        gsap.fromTo(
-          element,
-          { y: 34, opacity: 0, filter: "blur(10px)" },
-          {
-            y: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.9,
-            ease: "power3.out",
-            scrollTrigger: { trigger: element, start: "top 84%" },
-          },
-        );
-      });
-
-      gsap.utils.toArray<HTMLElement>("[data-count]").forEach((element) => {
-        const raw = element.dataset.count ?? "";
-        const numeric = Number(raw.replace(/[^0-9]/g, ""));
-        if (!numeric) return;
-        const suffix = raw.replace(/[0-9]/g, "");
-        gsap.fromTo(
-          element,
-          { textContent: 0 },
-          {
-            textContent: numeric,
-            duration: 1.4,
-            snap: { textContent: 1 },
-            ease: "power2.out",
-            scrollTrigger: { trigger: element, start: "top 86%" },
-            onUpdate: () => {
-              element.textContent = `${Math.round(Number(element.textContent))}${suffix}`;
-            },
-          },
-        );
-      });
-
-      gsap.fromTo(
-        ".timeline-line span",
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          transformOrigin: "top",
-          ease: "none",
-          scrollTrigger: { trigger: ".process-list", start: "top 80%", end: "bottom 35%", scrub: true },
-        },
-      );
-    }
-
-    bootMotion();
+    const countObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const element = entry.target as HTMLElement;
+          const raw = element.dataset.count ?? "";
+          const numeric = Number(raw.replace(/[^0-9]/g, ""));
+          const suffix = raw.replace(/[0-9]/g, "");
+          if (!numeric || reduced) {
+            element.textContent = raw;
+          } else {
+            let current = 0;
+            const step = Math.max(1, Math.ceil(numeric / 28));
+            const timer = window.setInterval(() => {
+              current = Math.min(numeric, current + step);
+              element.textContent = `${current}${suffix}`;
+              if (current >= numeric) window.clearInterval(timer);
+            }, 32);
+          }
+          countObserver.unobserve(element);
+        });
+      },
+      { threshold: 0.5 },
+    );
+    document.querySelectorAll("[data-count]").forEach((element) => countObserver.observe(element));
 
     const onPointer = (event: PointerEvent) => {
       if (!cursorRef.current) return;
@@ -342,9 +319,9 @@ export function DstLanding() {
 
     return () => {
       window.clearTimeout(loadTimer);
+      observer.disconnect();
+      countObserver.disconnect();
       window.removeEventListener("pointermove", onPointer);
-      if (rafId) cancelAnimationFrame(rafId);
-      lenis?.destroy();
     };
   }, []);
 
@@ -355,8 +332,8 @@ export function DstLanding() {
     const y = event.clientY - rect.top;
     card.style.setProperty("--mx", `${x}px`);
     card.style.setProperty("--my", `${y}px`);
-    card.style.setProperty("--rx", `${-(y / rect.height - 0.5) * 8}deg`);
-    card.style.setProperty("--ry", `${(x / rect.width - 0.5) * 8}deg`);
+    card.style.setProperty("--rx", `${-(y / rect.height - 0.5) * 4}deg`);
+    card.style.setProperty("--ry", `${(x / rect.width - 0.5) * 4}deg`);
   }
 
   function clearTilt(event: MouseEvent<HTMLElement>) {
@@ -368,13 +345,13 @@ export function DstLanding() {
     <>
       <div ref={cursorRef} className="custom-cursor" aria-hidden="true" />
       <div className={`loader ${loaded ? "loader-done" : ""}`} aria-hidden={loaded}>
-        <Image src="/assets/logo-dst-group.png" alt="" width={240} height={120} priority />
-        <span>Đang khởi tạo hệ sinh thái thương hiệu</span>
+        <BrandLogo />
+        <span>Dịch vụ tận tâm - Nâng tầm thương hiệu</span>
       </div>
 
       <header className="site-header">
         <button className="brand" onClick={() => scrollToSection("home")} aria-label="Về đầu trang">
-          <Image src="/assets/logo-dst-group.png" alt="DST Group" width={148} height={70} priority />
+          <BrandLogo />
         </button>
         <nav className="desktop-nav" aria-label="Menu chính">
           {navItems.map(([label, id]) => (
@@ -414,11 +391,11 @@ export function DstLanding() {
           <div className="hero-copy reveal">
             <p className="eyebrow">MARKETING • MEDIA • BRANDING</p>
             <h1>
-              Giải pháp Marketing toàn diện giúp thương hiệu <span>tăng trưởng bền vững</span>
+              Marketing đúng hướng, thương hiệu <span>tăng trưởng</span>
             </h1>
             <p className="hero-desc">
-              DST Group cung cấp hệ sinh thái Marketing, Media, Branding và chuyển đổi số dành cho doanh nghiệp. Chúng tôi
-              đồng hành từ chiến lược, sáng tạo nội dung đến triển khai và tối ưu hiệu quả.
+              DST Group đồng hành cùng doanh nghiệp từ chiến lược, nội dung, quảng cáo đến Media và Branding. Mỗi kế hoạch
+              được triển khai rõ ràng, đo lường minh bạch và tối ưu liên tục.
             </p>
             <div className="hero-actions">
               <button className="primary-btn" onClick={() => scrollToSection("services")}>
@@ -450,36 +427,34 @@ export function DstLanding() {
 
         <section id="about" className="section split-section">
           <div className="media-panel reveal">
-            <Image src="/assets/01-team-event-launch.jpg" alt="Đội ngũ DST trong một sự kiện ra mắt" width={780} height={980} />
+            <img src="/assets/01-team-event-launch.jpg" alt="Đội ngũ DST trong một sự kiện ra mắt" loading="lazy" decoding="async" />
             <div className="media-badge">
-              <UsersIcon size={20} /> Strategy rõ ràng • Triển khai minh bạch
+              <UsersIcon size={20} /> Chiến lược rõ ràng • Triển khai minh bạch
             </div>
           </div>
           <div className="section-copy reveal">
             <p className="eyebrow">Về chúng tôi</p>
-            <h2>Không chỉ làm Marketing, chúng tôi xây dựng giá trị thương hiệu</h2>
+            <h2>Xây dựng giá trị thương hiệu bền vững</h2>
             <p>
               DST Group là đơn vị cung cấp giải pháp Marketing và Media toàn diện, đồng hành cùng doanh nghiệp trong quá
-              trình xây dựng thương hiệu, tiếp cận khách hàng và phát triển kinh doanh.
+              trình tiếp cận khách hàng, xây dựng hình ảnh và phát triển kinh doanh.
             </p>
             <div className="stats-grid">
               {stats.map((item) => (
                 <div key={item.label}>
-                  <strong data-count={item.value}>
-                    {item.value}
-                  </strong>
+                  <strong data-count={item.value}>{item.value}</strong>
                   <span>{item.label}</span>
                 </div>
               ))}
             </div>
-            <p className="highlight-line">Chiến lược rõ ràng - Triển khai minh bạch - Tối ưu liên tục</p>
+            <p className="highlight-line">Dịch vụ tận tâm - Nâng tầm thương hiệu</p>
           </div>
         </section>
 
         <section id="services" className="section">
           <div className="section-heading reveal">
             <p className="eyebrow">Hệ sinh thái dịch vụ</p>
-            <h2>Giải pháp toàn diện cho doanh nghiệp</h2>
+            <h2>Giải pháp toàn diện</h2>
             <p>
               Từ chiến lược đến thực thi, DST Group cung cấp đầy đủ giải pháp giúp doanh nghiệp xây dựng thương hiệu và
               tăng trưởng doanh thu.
@@ -517,7 +492,7 @@ export function DstLanding() {
           <div className="package-inner reveal">
             <div>
               <p className="eyebrow dark">Giải pháp trọn gói</p>
-              <h2>Chi phí tối ưu cho một đội Marketing chuyên nghiệp</h2>
+              <h2>Một đội Marketing chuyên nghiệp, chi phí tối ưu</h2>
             </div>
             <button className="dark-btn" onClick={() => scrollToSection("contact")}>
               Yêu cầu báo giá
@@ -544,7 +519,7 @@ export function DstLanding() {
         <section id="process" className="section process-section">
           <div className="section-heading reveal">
             <p className="eyebrow">Quy trình làm việc</p>
-            <h2>Quy trình rõ ràng, hiệu quả minh bạch</h2>
+            <h2>Rõ ràng và minh bạch</h2>
           </div>
           <div className="process-list">
             <div className="timeline-line">
@@ -578,12 +553,12 @@ export function DstLanding() {
         <section id="projects" className="section project-section">
           <div className="section-heading reveal">
             <p className="eyebrow">Dự án tiêu biểu</p>
-            <h2>Những dự án tạo nên dấu ấn</h2>
+            <h2>Dấu ấn triển khai</h2>
           </div>
           <div className="project-rail">
             {projects.map((project) => (
               <article className="project-card reveal" key={project.title}>
-                <Image src={project.img} alt={project.title} width={620} height={430} />
+                <img src={project.img} alt={project.title} loading="lazy" decoding="async" />
                 <div className="project-overlay">
                   <span>{project.type}</span>
                   <h3>{project.title}</h3>
@@ -598,7 +573,7 @@ export function DstLanding() {
         <section id="clients" className="section clients-section">
           <div className="section-heading reveal">
             <p className="eyebrow">Đối tác và khách hàng</p>
-            <h2>Được tin tưởng bởi nhiều doanh nghiệp</h2>
+            <h2>Được doanh nghiệp tin tưởng</h2>
           </div>
           <div className="logo-cloud reveal">
             {[...clientLogos, ...clientLogos].map((logo, index) => (
@@ -608,7 +583,7 @@ export function DstLanding() {
           <div className="testimonial-grid">
             {testimonials.map((item) => (
               <article className="testimonial-card reveal" key={item.name}>
-                <Image src={item.img} alt={item.name} width={92} height={92} />
+                <img src={item.img} alt={item.name} loading="lazy" decoding="async" />
                 <div className="stars" aria-label="5 sao">
                   {Array.from({ length: 5 }).map((_, index) => (
                     <Star key={index} size={15} fill="currentColor" />
@@ -625,7 +600,7 @@ export function DstLanding() {
         <section className="final-cta">
           <div className="cta-content reveal">
             <p className="eyebrow">DST Group Marketing & Media</p>
-            <h2>Sẵn sàng đưa thương hiệu của bạn lên một tầm cao mới?</h2>
+            <h2>Sẵn sàng nâng tầm thương hiệu?</h2>
             <p>
               Hãy chia sẻ mục tiêu của bạn. Đội ngũ DST Group sẽ tư vấn giải pháp phù hợp và xây dựng kế hoạch triển khai
               cụ thể.
@@ -640,14 +615,14 @@ export function DstLanding() {
             </div>
           </div>
           <div className="cta-sphere" aria-hidden="true">
-            <Image src="/assets/logo-dst-group.png" alt="" width={360} height={180} />
+            <BrandLogo />
           </div>
         </section>
 
         <section id="contact" className="section contact-section">
           <div className="contact-info reveal">
             <p className="eyebrow">Liên hệ</p>
-            <h2>Nhận tư vấn chiến lược Marketing phù hợp</h2>
+            <h2>Nhận tư vấn chiến lược</h2>
             <p>
               Công ty Cổ phần Tập Đoàn DST
               <br />
@@ -669,7 +644,7 @@ export function DstLanding() {
 
       <footer className="site-footer">
         <div>
-          <Image src="/assets/logo-dst-marketing-media.png" alt="DST Group Marketing Media" width={210} height={118} />
+          <BrandLogo variant="media" />
           <p>Dịch vụ tận tâm - Nâng tầm thương hiệu.</p>
         </div>
         <div>

@@ -1,18 +1,11 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
-
-const beVietnam = Be_Vietnam_Pro({
-  variable: "--font-be-vietnam",
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
 
 const description =
   "DST Group cung cấp dịch vụ Marketing, quảng cáo, TikTok Shop, thiết kế website, sản xuất Media, Branding và xây dựng phòng Marketing cho doanh nghiệp.";
 
 export const metadata: Metadata = {
-  title: "DST Group | Giải pháp Marketing, Media và Branding toàn diện",
+  title: "DST Group | Marketing, Media và Branding toàn diện",
   description,
   keywords: [
     "DST Group",
@@ -80,7 +73,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi">
-      <body className={`${beVietnam.variable} antialiased`}>
+      <body>
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       </body>
