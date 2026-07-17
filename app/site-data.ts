@@ -50,54 +50,114 @@ export const services = [
     title: "Digital Advertising",
     text: "Triển khai quảng cáo đa nền tảng với dữ liệu, thông điệp và tối ưu liên tục.",
     tags: ["Facebook Ads", "Google Ads", "TikTok Ads", "YouTube Ads"],
+    detail:
+      "DST xây dựng cấu trúc chiến dịch theo mục tiêu kinh doanh: nhận diện, khách hàng tiềm năng, chuyển đổi hoặc doanh thu. Dịch vụ tập trung vào đo lường, tối ưu ngân sách và báo cáo minh bạch.",
+    fit: "Phù hợp với doanh nghiệp đã có sản phẩm, website/fanpage hoặc kênh bán hàng và cần tăng trưởng bằng quảng cáo có kiểm soát.",
+    deliverables: ["Kế hoạch kênh và ngân sách", "Thông điệp quảng cáo", "Thiết lập tracking cơ bản", "Báo cáo hiệu quả định kỳ"],
+    proofNote:
+      "Không dùng ảnh minh họa cho hạng mục này vì hiệu quả quảng cáo nên được chứng minh bằng dữ liệu chiến dịch, dashboard và báo cáo thực tế.",
   },
   {
     icon: ShoppingBag,
     title: "TikTok Shop Partner",
     text: "Thiết lập, quản lý và tăng trưởng gian hàng TikTok Shop từ nội dung đến vận hành.",
     tags: ["Setup gian hàng", "Livestream", "KOC/KOL", "Tối ưu sản phẩm"],
+    detail:
+      "Đội ngũ DST hỗ trợ thiết lập gian hàng, tối ưu sản phẩm, xây dựng lịch nội dung, kịch bản livestream và kết nối KOC/KOL phù hợp ngành hàng.",
+    fit: "Phù hợp với thương hiệu bán lẻ, mỹ phẩm, F&B, sản phẩm tiêu dùng hoặc doanh nghiệp muốn thử nghiệm social commerce.",
+    deliverables: ["Checklist setup gian hàng", "Kịch bản livestream", "Lịch nội dung TikTok", "Đề xuất KOC/KOL và tối ưu sản phẩm"],
+    proofImage: "/assets/03-studio-content-creator.jpg",
+    proofAlt: "Không gian sản xuất nội dung và livestream cho TikTok Shop",
+    proofCaption: "Ảnh phù hợp vì thể hiện hoạt động sản xuất nội dung/livestream, không phải ảnh minh họa ngẫu nhiên.",
   },
   {
     icon: Code2,
     title: "Design & Website",
     text: "Thiết kế website, landing page và hệ thống nhận diện có tính ứng dụng cao.",
     tags: ["Website", "Landing page", "Logo", "Profile"],
+    detail:
+      "Dịch vụ tập trung vào trải nghiệm người dùng, cấu trúc nội dung, giao diện thương hiệu và khả năng chuyển đổi. Website/landing page được thiết kế theo mục tiêu bán hàng hoặc tuyển khách hàng tiềm năng.",
+    fit: "Phù hợp với doanh nghiệp cần website giới thiệu, landing page chiến dịch, profile công ty hoặc hệ thống nhận diện đồng bộ.",
+    deliverables: ["Sitemap và wireframe", "Thiết kế giao diện", "Nội dung theo cấu trúc chuyển đổi", "Bàn giao source/asset theo phạm vi dự án"],
+    proofNote:
+      "Bộ ảnh hiện tại không có ảnh màn hình website hoặc thiết kế giao diện cụ thể, nên phần này ưu tiên mô tả quy trình thay vì dùng ảnh sai ngữ cảnh.",
   },
   {
     icon: FileText,
     title: "Content Marketing",
     text: "Xây dựng kế hoạch nội dung, kịch bản video, bài PR và content quảng cáo.",
     tags: ["Social content", "Video script", "PR", "Content plan"],
+    detail:
+      "DST phát triển nội dung dựa trên định vị thương hiệu, chân dung khách hàng và mục tiêu từng kênh. Nội dung không chỉ để đăng đều mà phải phục vụ nhận diện, niềm tin và chuyển đổi.",
+    fit: "Phù hợp với doanh nghiệp cần vận hành fanpage/kênh xã hội ổn định hoặc chuẩn hóa giọng nói thương hiệu.",
+    deliverables: ["Content pillar", "Lịch nội dung", "Kịch bản video ngắn", "Bài PR hoặc bài quảng cáo theo chiến dịch"],
+    proofImage: "/assets/05-studio-behind-scenes.jpg",
+    proofAlt: "Hậu trường sản xuất nội dung tại studio",
+    proofCaption: "Ảnh minh chứng liên quan đến quá trình chuẩn bị và sản xuất nội dung.",
   },
   {
     icon: Camera,
     title: "Studio & Media",
     text: "Sản xuất hình ảnh, video, TVC, livestream và tư liệu truyền thông chuyên nghiệp.",
     tags: ["TVC", "Livestream", "Chụp sản phẩm", "Sự kiện"],
+    detail:
+      "Dịch vụ bao gồm chụp ảnh sản phẩm, quay video doanh nghiệp, TVC, livestream và ghi hình sự kiện. DST chuẩn bị kịch bản, bối cảnh, thiết bị và hậu kỳ theo mục tiêu truyền thông.",
+    fit: "Phù hợp với doanh nghiệp cần tư liệu hình ảnh/video chuyên nghiệp để dùng cho quảng cáo, website, social và sales kit.",
+    deliverables: ["Kịch bản quay/chụp", "Shot list", "File ảnh/video đã hậu kỳ", "Phiên bản tối ưu cho nhiều nền tảng"],
+    proofImage: "/assets/06-media-commercial-production.jpg",
+    proofAlt: "Bối cảnh sản xuất video thương mại",
+    proofCaption: "Ảnh thể hiện đúng hoạt động sản xuất media, phù hợp với nội dung dịch vụ.",
   },
   {
     icon: Palette,
     title: "Branding",
     text: "Định hình chiến lược, nhận diện và truyền thông thương hiệu dài hạn.",
     tags: ["Brand strategy", "Identity", "Personal brand", "Communication"],
+    detail:
+      "DST hỗ trợ làm rõ định vị, tính cách thương hiệu, thông điệp cốt lõi và hệ thống nhận diện. Mục tiêu là giúp thương hiệu nhất quán hơn trên mọi điểm chạm.",
+    fit: "Phù hợp với doanh nghiệp mới ra mắt, tái định vị, mở rộng thị trường hoặc cần chuẩn hóa hình ảnh.",
+    deliverables: ["Định vị thương hiệu", "Thông điệp và tagline", "Moodboard nhận diện", "Hướng dẫn ứng dụng cơ bản"],
+    proofImage: "/assets/09-branding-workshop.jpg",
+    proofAlt: "Workshop xây dựng thương hiệu",
+    proofCaption: "Ảnh phù hợp vì thể hiện hoạt động làm việc chiến lược và định hướng thương hiệu.",
   },
   {
     icon: RadioTower,
     title: "Booking & PR",
     text: "Kết nối truyền thông, KOL/KOC, fanpage, báo chí và màn hình LED.",
     tags: ["Fanpage", "Báo chí", "KOL/KOC", "Review"],
+    detail:
+      "Dịch vụ giúp doanh nghiệp chọn kênh truyền thông phù hợp, chuẩn hóa thông điệp PR và triển khai booking theo mục tiêu phủ sóng, uy tín hoặc ra mắt chiến dịch.",
+    fit: "Phù hợp với thương hiệu chuẩn bị khai trương, ra mắt sản phẩm, sự kiện hoặc cần tăng độ tin cậy truyền thông.",
+    deliverables: ["Đề xuất kênh booking", "Thông điệp PR", "Kịch bản truyền thông", "Theo dõi và tổng hợp hiệu quả"],
+    proofImage: "/assets/07-media-event-production.jpg",
+    proofAlt: "Sản xuất truyền thông tại sự kiện",
+    proofCaption: "Ảnh liên quan đến truyền thông sự kiện, phù hợp hơn ảnh stock hoặc minh họa chung chung.",
   },
   {
     icon: Hotel,
     title: "Setup Restaurant - Hotel",
     text: "Tư vấn thị trường, thương hiệu, khai trương và marketing vận hành dịch vụ.",
     tags: ["Market research", "Opening plan", "Team setup", "Hospitality"],
+    detail:
+      "DST hỗ trợ nghiên cứu thị trường, xây dựng thương hiệu, kế hoạch khai trương, nội dung vận hành và marketing cho nhà hàng, khách sạn, spa hoặc mô hình dịch vụ.",
+    fit: "Phù hợp với mô hình hospitality chuẩn bị khai trương, cần tái định vị hoặc muốn tăng khách đặt bàn/đặt phòng.",
+    deliverables: ["Khảo sát thị trường", "Concept thương hiệu", "Kế hoạch khai trương", "Lịch nội dung và quảng cáo vận hành"],
+    proofImage: "/assets/10-hotel-lobby-project.jpg",
+    proofAlt: "Không gian dự án khách sạn",
+    proofCaption: "Ảnh phù hợp vì bối cảnh thuộc nhóm nhà hàng/khách sạn, đúng với dịch vụ setup hospitality.",
   },
   {
     icon: Building2,
     title: "Xây dựng phòng Marketing",
     text: "Thiết lập nhân sự, quy trình, KPI và năng lực marketing nội bộ cho doanh nghiệp.",
     tags: ["Tuyển dụng", "Quy trình", "Đào tạo", "KPI"],
+    detail:
+      "DST tư vấn cấu trúc phòng Marketing, vai trò nhân sự, quy trình phối hợp, KPI và cách đo lường để doanh nghiệp có thể tự vận hành lâu dài.",
+    fit: "Phù hợp với doanh nghiệp đang tăng trưởng, có nhu cầu xây đội nội bộ nhưng thiếu quy trình và tiêu chuẩn triển khai.",
+    deliverables: ["Sơ đồ vai trò nhân sự", "Quy trình làm việc", "Bộ KPI cơ bản", "Kế hoạch đào tạo và chuyển giao"],
+    proofNote:
+      "Không dùng ảnh minh họa vì hạng mục này nên được chứng minh bằng quy trình, sơ đồ tổ chức và tài liệu chuyển giao.",
   },
 ];
 

@@ -37,6 +37,8 @@ const marqueeItems = [
   "Digital Transformation",
 ];
 
+type ServiceItem = (typeof services)[number];
+
 function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -263,9 +265,102 @@ function ContactForm() {
   );
 }
 
+function ServiceDetailModal({
+  service,
+  onClose,
+}: {
+  service: ServiceItem | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!service) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.body.classList.add("modal-open");
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.classList.remove("modal-open");
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [service, onClose]);
+
+  if (!service) return null;
+
+  const Icon = service.icon;
+  const hasImage = "proofImage" in service && service.proofImage;
+
+  return (
+    <div className="service-modal" role="dialog" aria-modal="true" aria-labelledby="service-modal-title">
+      <button className="modal-backdrop" onClick={onClose} aria-label="Đóng chi tiết dịch vụ" />
+      <article className="service-modal-card">
+        <button className="modal-close" onClick={onClose} aria-label="Đóng chi tiết dịch vụ">
+          <X size={20} />
+        </button>
+        <div className="modal-intro">
+          <div className="modal-icon">
+            <Icon size={30} />
+          </div>
+          <p className="eyebrow">Chi tiết dịch vụ</p>
+          <h2 id="service-modal-title">{service.title}</h2>
+          <p>{service.detail}</p>
+        </div>
+
+        <div className={`modal-body ${hasImage ? "" : "no-proof-image"}`}>
+          {hasImage ? (
+            <figure className="service-proof">
+              <img src={service.proofImage} alt={service.proofAlt} loading="lazy" decoding="async" />
+              <figcaption>{service.proofCaption}</figcaption>
+            </figure>
+          ) : (
+            <div className="proof-note">
+              <strong>Không dùng ảnh minh họa tùy tiện</strong>
+              <p>{service.proofNote}</p>
+            </div>
+          )}
+
+          <div className="modal-detail-grid">
+            <section>
+              <h3>Phù hợp với</h3>
+              <p>{service.fit}</p>
+            </section>
+            <section>
+              <h3>Hạng mục bàn giao</h3>
+              <ul>
+                {service.deliverables.map((item) => (
+                  <li key={item}>
+                    <CheckIcon size={16} /> {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </div>
+
+        <div className="modal-actions">
+          <button
+            className="primary-btn"
+            onClick={() => {
+              onClose();
+              scrollToSection("contact");
+            }}
+          >
+            Tư vấn dịch vụ này <ChevronRight size={18} />
+          </button>
+          <button className="ghost-btn" onClick={onClose}>
+            Xem dịch vụ khác
+          </button>
+        </div>
+      </article>
+    </div>
+  );
+}
+
 export function DstLanding() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const cursorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -479,7 +574,7 @@ export function DstLanding() {
                       <span key={tag}>{tag}</span>
                     ))}
                   </div>
-                  <button onClick={() => scrollToSection("contact")}>
+                  <button onClick={() => setSelectedService(service)}>
                     Xem chi tiết <ArrowUpRight size={16} />
                   </button>
                 </article>
@@ -641,6 +736,8 @@ export function DstLanding() {
           <ContactForm />
         </section>
       </main>
+
+      <ServiceDetailModal service={selectedService} onClose={() => setSelectedService(null)} />
 
       <footer className="site-footer">
         <div>
