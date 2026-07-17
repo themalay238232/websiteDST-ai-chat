@@ -436,7 +436,7 @@ export function DstLanding() {
                     ))}
                   </div>
                   <button onClick={() => setSelectedService(service)}>
-                    Xem chi tiáº¿t <ArrowUpRight size={16} />
+                    Xem chi tiết <ArrowUpRight size={16} />
                   </button>
                 </article>
               );
