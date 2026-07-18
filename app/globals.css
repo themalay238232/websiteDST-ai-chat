@@ -977,9 +977,19 @@ h3 {
 
 .process-item {
   position: relative;
-  min-height: 168px;
-  padding: 22px;
+  min-height: 184px;
+  padding: 24px;
   border-radius: var(--radius);
+}
+
+.process-item > svg {
+  display: block;
+  margin: 4px 0 18px;
+}
+
+.process-item h3 {
+  margin: 0;
+  line-height: 1.42;
 }
 
 .step-index {

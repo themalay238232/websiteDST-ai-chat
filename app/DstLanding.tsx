@@ -586,7 +586,7 @@ function LandingHome() {
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ delay: index * 0.08, duration: 0.5 }}
               >
-                <img src={project.img} alt={project.title} loading="lazy" decoding="async" />
+                <img src={project.img} alt={project.title} loading="eager" decoding="async" />
                 <div className="project-overlay">
                   <span>{project.type}</span>
                   <h3>{project.title}</h3>
