@@ -89,8 +89,63 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 
 - `npm run dev`: start local development
 - `npm run build`: verify the vinext build output
+- `npm run build:github-pages`: build the static GitHub Pages version into `outputs/gh-pages-dist`
 - `npm test`: build the starter and verify its rendered loading skeleton
 - `npm run db:generate`: generate Drizzle migrations after schema changes
+
+## AI Chat Consultant
+
+The site includes a floating DST consultation chat widget in the bottom-right
+corner. It supports:
+
+- greeting script and quick questions for DST services
+- lead capture: name, phone number, and consultation need
+- answers grounded in the listed DST services
+- fallback links to Zalo and phone when AI is unavailable
+- optional backend AI proxy at `/api/chat`
+
+Do not put OpenAI or Gemini API keys in frontend code. Copy `.env.example` to
+`.env` only on the backend/serverless environment and set one provider:
+
+```bash
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+or:
+
+```bash
+GEMINI_API_KEY=...
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+For the vinext/Cloudflare Worker deployment, `/api/chat` is handled by
+`worker/index.ts`. For GitHub Pages, deploy the chat proxy separately, then set
+the proxy URL in `gh-pages-static/index.html`:
+
+```html
+<script>
+  window.__DST_CHAT_CONFIG__ = {
+    apiUrl: "https://your-chat-proxy.example.com/api/chat",
+  };
+</script>
+```
+
+If `apiUrl` is empty on GitHub Pages, the widget still works in safe fallback
+mode using the local DST service data and direct Zalo/phone handoff.
+
+## GitHub Pages Deploy
+
+The public GitHub Pages version is a Vite static build in `gh-pages-static/`.
+
+```bash
+npm install
+npm run build:github-pages
+```
+
+Publish the generated `outputs/gh-pages-dist` folder to GitHub Pages. The Vite
+base path is already set to `/websiteDST/` for
+`https://themalay238232.github.io/websiteDST/`.
 
 ## Learn More
 

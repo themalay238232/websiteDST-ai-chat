@@ -35,6 +35,7 @@ import {
   testimonials,
   UsersIcon,
 } from "./site-data";
+import { AiConsultantChat } from "./AiConsultantChat";
 
 const marqueeItems = [
   "Marketing Strategy",
@@ -704,7 +705,7 @@ export function DstLanding() {
                     <Star key={starIndex} size={15} fill="currentColor" />
                   ))}
                 </div>
-                <p>"{item.quote}"</p>
+                <p>&ldquo;{item.quote}&rdquo;</p>
                 <strong>{item.name}</strong>
                 <span>{item.role}</span>
               </motion.article>
@@ -801,6 +802,7 @@ export function DstLanding() {
           ↑
         </button>
       </div>
+      <AiConsultantChat />
     </>
   );
 }
