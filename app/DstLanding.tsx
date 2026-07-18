@@ -20,7 +20,16 @@ import {
   useSpring,
   useTransform,
 } from "motion/react";
-import { FormEvent, MouseEvent, ReactNode, useEffect, useState } from "react";
+import {
+  FormEvent,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+  TouchEvent as ReactTouchEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   CheckIcon,
   clientLogos,
@@ -52,37 +61,110 @@ function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function BrandLogo({ variant = "group", className = "" }: { variant?: "group" | "media"; className?: string }) {
+function BrandLogo({
+  variant = "group",
+  className = "",
+  priority = false,
+}: {
+  variant?: "group" | "media";
+  className?: string;
+  priority?: boolean;
+}) {
   const src = variant === "media" ? "assets/logo-dst-marketing-media.png" : "assets/logo-dst-group.png";
   const alt = variant === "media" ? "DST Marketing Media" : "DST Group - Dịch vụ tận tâm - Nâng tầm thương hiệu";
 
-  return <img className={`brand-logo ${className}`} src={src} alt={alt} loading="eager" decoding="async" />;
+  return (
+    <img
+      className={`brand-logo ${className}`}
+      src={src}
+      alt={alt}
+      loading={priority ? "eager" : "lazy"}
+      decoding="async"
+      fetchPriority={priority ? "high" : "auto"}
+      width={320}
+      height={120}
+    />
+  );
+}
+
+/** Keep effects, but only commit pointer samples once per animation frame. */
+function usePointerParallax(enabled: boolean) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const frame = useRef(0);
+  const pending = useRef<{ nx: number; ny: number } | null>(null);
+  const [active, setActive] = useState(false);
+
+  const flush = useCallback(() => {
+    frame.current = 0;
+    const next = pending.current;
+    if (!next) return;
+    pending.current = null;
+    x.set(next.nx);
+    y.set(next.ny);
+  }, [x, y]);
+
+  const setFromClientPoint = useCallback(
+    (target: HTMLElement, clientX: number, clientY: number) => {
+      if (!enabled) return;
+      const rect = target.getBoundingClientRect();
+      const width = rect.width || 1;
+      const height = rect.height || 1;
+      pending.current = {
+        nx: Math.max(-0.5, Math.min(0.5, (clientX - rect.left) / width - 0.5)),
+        ny: Math.max(-0.5, Math.min(0.5, (clientY - rect.top) / height - 0.5)),
+      };
+      if (!frame.current) frame.current = window.requestAnimationFrame(flush);
+    },
+    [enabled, flush],
+  );
+
+  const onMouseMove = useCallback(
+    (event: ReactMouseEvent<HTMLElement>) => {
+      setActive(true);
+      setFromClientPoint(event.currentTarget, event.clientX, event.clientY);
+    },
+    [setFromClientPoint],
+  );
+
+  const onTouchMove = useCallback(
+    (event: ReactTouchEvent<HTMLElement>) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      setActive(true);
+      setFromClientPoint(event.currentTarget, touch.clientX, touch.clientY);
+    },
+    [setFromClientPoint],
+  );
+
+  const onLeave = useCallback(() => {
+    setActive(false);
+    pending.current = { nx: 0, ny: 0 };
+    if (!frame.current) frame.current = window.requestAnimationFrame(flush);
+  }, [flush]);
+
+  useEffect(
+    () => () => {
+      if (frame.current) window.cancelAnimationFrame(frame.current);
+    },
+    [],
+  );
+
+  return { x, y, active, onMouseMove, onTouchMove, onLeave };
 }
 
 function useTilt3D(strength = 10) {
   const reduce = useReducedMotion();
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const spring = { stiffness: 180, damping: 22, mass: 0.6 };
+  const enabled = !reduce;
+  const { x, y, active, onMouseMove, onTouchMove, onLeave } = usePointerParallax(enabled);
+  const spring = { stiffness: 160, damping: 24, mass: 0.55 };
   const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [strength, -strength]), spring);
   const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-strength, strength]), spring);
   const glareX = useTransform(x, [-0.5, 0.5], [0, 100]);
   const glareY = useTransform(y, [-0.5, 0.5], [0, 100]);
-  const glare = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.18), transparent 42%)`;
+  const glare = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.22), transparent 44%)`;
 
-  function onMove(event: MouseEvent<HTMLElement>) {
-    if (reduce) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    x.set((event.clientX - rect.left) / rect.width - 0.5);
-    y.set((event.clientY - rect.top) / rect.height - 0.5);
-  }
-
-  function onLeave() {
-    x.set(0);
-    y.set(0);
-  }
-
-  return { reduce, rotateX, rotateY, glare, onMove, onLeave };
+  return { reduce, rotateX, rotateY, glare, active, onMouseMove, onTouchMove, onLeave };
 }
 
 function Tilt3DCard({
@@ -96,11 +178,11 @@ function Tilt3DCard({
   delay?: number;
   strength?: number;
 }) {
-  const { reduce, rotateX, rotateY, glare, onMove, onLeave } = useTilt3D(strength);
+  const { reduce, rotateX, rotateY, glare, active, onMouseMove, onTouchMove, onLeave } = useTilt3D(strength);
 
   return (
     <motion.article
-      className={`${className} tilt-3d`}
+      className={`${className} tilt-3d${active ? " is-tilting" : ""}`}
       style={
         reduce
           ? undefined
@@ -113,11 +195,13 @@ function Tilt3DCard({
       }
       initial={reduce ? false : { opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={reduce ? undefined : { y: -6, transition: { type: "spring", stiffness: 280, damping: 22 } }}
-      onMouseMove={onMove}
+      viewport={{ once: true, amount: 0.18, margin: "0px 0px -8% 0px" }}
+      transition={{ delay, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={reduce ? undefined : { y: -8, transition: { type: "spring", stiffness: 260, damping: 24 } }}
+      onMouseMove={onMouseMove}
+      onTouchMove={onTouchMove}
       onMouseLeave={onLeave}
+      onTouchEnd={onLeave}
     >
       {!reduce ? <motion.span className="tilt-glare" style={{ background: glare }} aria-hidden="true" /> : null}
       <div className="tilt-3d-content">{children}</div>
@@ -127,49 +211,58 @@ function Tilt3DCard({
 
 function HeroScene() {
   const reduce = useReducedMotion();
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const spring = { stiffness: 120, damping: 18, mass: 0.5 };
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), spring);
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-12, 12]), spring);
-  const layerSlowX = useSpring(useTransform(x, [-0.5, 0.5], [-18, 18]), spring);
-  const layerSlowY = useSpring(useTransform(y, [-0.5, 0.5], [-12, 12]), spring);
-  const layerFastX = useSpring(useTransform(x, [-0.5, 0.5], [-34, 34]), spring);
-  const layerFastY = useSpring(useTransform(y, [-0.5, 0.5], [-22, 22]), spring);
-
-  function onMove(event: MouseEvent<HTMLDivElement>) {
-    if (reduce) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    x.set((event.clientX - rect.left) / rect.width - 0.5);
-    y.set((event.clientY - rect.top) / rect.height - 0.5);
-  }
-
-  function onLeave() {
-    x.set(0);
-    y.set(0);
-  }
+  const enabled = !reduce;
+  const { x, y, active, onMouseMove, onTouchMove, onLeave } = usePointerParallax(enabled);
+  const spring = { stiffness: 110, damping: 20, mass: 0.5 };
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), spring);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-14, 14]), spring);
+  const layerSlowX = useSpring(useTransform(x, [-0.5, 0.5], [-22, 22]), spring);
+  const layerSlowY = useSpring(useTransform(y, [-0.5, 0.5], [-14, 14]), spring);
+  const layerFastX = useSpring(useTransform(x, [-0.5, 0.5], [-42, 42]), spring);
+  const layerFastY = useSpring(useTransform(y, [-0.5, 0.5], [-28, 28]), spring);
+  const stageX = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), spring);
+  const stageY = useSpring(useTransform(y, [-0.5, 0.5], [-8, 8]), spring);
 
   return (
     <motion.div
-      className="hero-visual"
+      className={`hero-visual${active ? " is-active" : ""}`}
       aria-label="Logo DST trong không gian nhận diện"
-      onMouseMove={onMove}
+      onMouseMove={onMouseMove}
+      onTouchMove={onTouchMove}
       onMouseLeave={onLeave}
-      initial={reduce ? false : { opacity: 0, rotateY: -16, z: -40 }}
+      onTouchEnd={onLeave}
+      initial={reduce ? false : { opacity: 0, rotateY: -18, z: -60 }}
       animate={{ opacity: 1, rotateY: 0, z: 0 }}
-      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      style={{ transformStyle: "preserve-3d", transformPerspective: 1400 }}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      style={{ transformStyle: "preserve-3d", transformPerspective: 1600 }}
     >
       <motion.div
-        className="hero-orb hero-orb-coral"
+        className="hero-stage"
         aria-hidden="true"
-        style={reduce ? undefined : { x: layerSlowX, y: layerSlowY }}
+        style={reduce ? undefined : { x: stageX, y: stageY, rotateX: 8, rotateY }}
       />
       <motion.div
-        className="hero-orb hero-orb-seafoam"
+        className="hero-ring"
+        aria-hidden="true"
+        style={reduce ? undefined : { x: layerSlowX, y: layerSlowY }}
+        animate={reduce ? undefined : { rotateZ: [0, 360] }}
+        transition={{ duration: 48, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div className="hero-beam" aria-hidden="true" />
+      <motion.div
+        className="hero-orb-layer"
+        aria-hidden="true"
+        style={reduce ? undefined : { x: layerSlowX, y: layerSlowY }}
+      >
+        <div className="hero-orb hero-orb-coral" />
+      </motion.div>
+      <motion.div
+        className="hero-orb-layer"
         aria-hidden="true"
         style={reduce ? undefined : { x: layerFastX, y: layerFastY }}
-      />
+      >
+        <div className="hero-orb hero-orb-seafoam" />
+      </motion.div>
       <motion.div className="brand-orbit brand-orbit-one" style={reduce ? undefined : { x: layerSlowX, y: layerSlowY }} />
       <motion.div className="brand-orbit brand-orbit-two" style={reduce ? undefined : { x: layerFastX, y: layerFastY }} />
       <motion.div className="brand-chip chip-gold" style={reduce ? undefined : { x: layerFastX, y: layerSlowY }} />
@@ -186,10 +279,10 @@ function HeroScene() {
                 transformStyle: "preserve-3d",
               }
         }
-        animate={reduce ? undefined : { y: [0, -5, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        animate={reduce ? undefined : { y: [0, -8, 0] }}
+        transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
       >
-        <BrandLogo variant="media" />
+        <BrandLogo variant="media" priority />
       </motion.div>
       <motion.div className="orbit-label orbit-label-top" style={reduce ? undefined : { x: layerFastX, y: layerSlowY }}>
         ADS
@@ -304,7 +397,6 @@ function ServiceDetailModal({
   if (!service) return null;
 
   const Icon = service.icon;
-  const hasImage = "proofImage" in service && service.proofImage;
 
   return (
     <div className="service-modal" role="dialog" aria-modal="true" aria-labelledby="service-modal-title">
@@ -322,12 +414,20 @@ function ServiceDetailModal({
           <p>{service.detail}</p>
         </div>
 
-        <div className={`modal-body ${hasImage ? "" : "no-proof-image"}`}>
-          {hasImage ? (
+        <div className="modal-body">
+          {"proofImage" in service && service.proofImage ? (
             <figure className="service-proof">
-              <img src={service.proofImage} alt={service.proofAlt} loading="lazy" decoding="async" />
-              <figcaption>{service.proofCaption}</figcaption>
-            </figure> ) : null}
+              <img
+                src={service.proofImage}
+                alt={service.proofAlt ?? service.title}
+                loading="eager"
+                decoding="async"
+                width={960}
+                height={720}
+              />
+              {service.proofCaption ? <figcaption>{service.proofCaption}</figcaption> : null}
+            </figure>
+          ) : null}
 
           <div className="modal-detail-grid">
             <section>
@@ -430,13 +530,13 @@ export function DstLanding() {
   return (
     <>
       <div className={`loader ${loaded ? "loader-done" : ""}`} aria-hidden={loaded}>
-        <BrandLogo />
+        <BrandLogo priority />
         <span>Dịch vụ tận tâm - Nâng tầm thương hiệu</span>
       </div>
 
       <header className={`site-header${headerScrolled ? " is-scrolled" : ""}`}>
         <button className="brand" onClick={() => scrollToSection("home")} aria-label="Về đầu trang">
-          <BrandLogo />
+          <BrandLogo priority />
         </button>
         <nav className="desktop-nav" aria-label="Menu chính">
           {navItems.map(([label, id]) => (
@@ -480,13 +580,15 @@ export function DstLanding() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             style={{ transformPerspective: 900 }}
           >
-            <p className="eyebrow">MARKETING • MEDIA • BRANDING</p>
+            <p className="eyebrow">Marketing · Media · Branding</p>
             <h1>
-              Marketing đúng hướng, thương hiệu <span>tăng trưởng</span>
+              Marketing đúng hướng,
+              <br />
+              thương hiệu <span>tăng trưởng</span>
             </h1>
             <p className="hero-desc">
-              DST Group đồng hành cùng doanh nghiệp từ chiến lược, nội dung, quảng cáo đến Media và Branding. Mỗi kế hoạch
-              được triển khai rõ ràng, đo lường minh bạch và tối ưu liên tục.
+              DST Group đồng hành cùng doanh nghiệp từ chiến lược, nội dung, quảng cáo đến Media và Branding.
+              Mỗi kế hoạch được triển khai rõ ràng, đo lường minh bạch và tối ưu liên tục.
             </p>
             <div className="hero-actions">
               <button className="primary-btn" onClick={() => scrollToSection("services")}>

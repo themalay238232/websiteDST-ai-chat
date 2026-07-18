@@ -1,6 +1,7 @@
 "use client";
 
 import { Bot, MessageCircle, Phone, Send, User, X, Zap } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { FormEvent, useRef, useState } from "react";
 import { services } from "./site-data";
 
@@ -95,6 +96,7 @@ async function requestAiAnswer(messages: ChatMessage[], lead: LeadProfile) {
 }
 
 export function AiConsultantChat() {
+  const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: "welcome", role: "assistant", text: greetings },
@@ -139,77 +141,112 @@ export function AiConsultantChat() {
 
   return (
     <section className={`ai-chat ${open ? "is-open" : ""}`} aria-label="Trợ lý tư vấn DST Group">
-      {open ? (
-        <div className="ai-chat-panel" role="dialog" aria-modal="false" aria-label="Chat tư vấn DST Group">
-          <header className="ai-chat-header">
-            <div>
-              <span>
-                <Bot size={17} /> AI tư vấn DST
-              </span>
-              <p>Marketing, Media, Branding</p>
-            </div>
-            <button onClick={() => setOpen(false)} aria-label="Đóng chat tư vấn">
-              <X size={18} />
-            </button>
-          </header>
-
-          <div className="ai-chat-messages" aria-live="polite">
-            {messages.map((message) => (
-              <article className={`ai-message ${message.role}`} key={message.id}>
-                <span>{message.role === "assistant" ? <Bot size={15} /> : <User size={15} />}</span>
-                <p>{message.text}</p>
-              </article>
-            ))}
-            {loading ? (
-              <article className="ai-message assistant">
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            className="ai-chat-panel"
+            role="dialog"
+            aria-modal="false"
+            aria-label="Chat tư vấn DST Group"
+            initial={reduce ? false : { opacity: 0, y: 28, rotateX: 12, scale: 0.94 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+            exit={reduce ? undefined : { opacity: 0, y: 18, rotateX: 8, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.65 }}
+            style={{ transformPerspective: 1200, transformOrigin: "bottom right" }}
+          >
+            <header className="ai-chat-header">
+              <div>
                 <span>
-                  <Bot size={15} />
+                  <Bot size={17} /> AI tư vấn DST
                 </span>
-                <p>Đang kiểm tra nhu cầu và dữ liệu dịch vụ...</p>
-              </article>
-            ) : null}
-          </div>
-
-          <div className="ai-quick-list" aria-label="Câu hỏi nhanh">
-            {quickQuestions.map((question) => (
-              <button key={question} onClick={() => sendQuestion(question)}>
-                {question}
+                <p>Marketing, Media, Branding</p>
+                <div className="ai-status">
+                  <i aria-hidden="true" /> Trực tuyến
+                </div>
+              </div>
+              <button onClick={() => setOpen(false)} aria-label="Đóng chat tư vấn">
+                <X size={18} />
               </button>
-            ))}
-          </div>
+            </header>
 
-          <form className="ai-chat-input" onSubmit={onSubmit}>
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder="Nhập câu hỏi tư vấn..."
-              aria-label="Nhập câu hỏi tư vấn"
-            />
-            <button type="submit" disabled={!input.trim() || loading} aria-label="Gửi câu hỏi">
-              <Send size={17} />
-            </button>
-          </form>
+            <div className="ai-chat-messages" aria-live="polite">
+              {messages.map((message) => (
+                <motion.article
+                  className={`ai-message ${message.role}`}
+                  key={message.id}
+                  initial={reduce ? false : { opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <span>{message.role === "assistant" ? <Bot size={15} /> : <User size={15} />}</span>
+                  <p>{message.text}</p>
+                </motion.article>
+              ))}
+              {loading ? (
+                <article className="ai-message assistant">
+                  <span>
+                    <Bot size={15} />
+                  </span>
+                  <p>
+                    <span className="ai-typing" aria-label="Đang soạn trả lời">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                  </p>
+                </article>
+              ) : null}
+            </div>
 
-          <div className="ai-chat-fallback">
-            <a href={ZALO_URL} target="_blank" rel="noreferrer">
-              Chat Zalo
-            </a>
-            <a href={`tel:${CONTACT_PHONE}`}>
-              <Phone size={15} /> {CONTACT_PHONE}
-            </a>
-          </div>
-        </div>
-      ) : null}
+            <div className="ai-quick-list" aria-label="Câu hỏi nhanh">
+              {quickQuestions.map((question) => (
+                <button key={question} onClick={() => sendQuestion(question)}>
+                  {question}
+                </button>
+              ))}
+            </div>
 
-      <button className="ai-chat-toggle" onClick={() => setOpen((current) => !current)} aria-expanded={open}>
+            <form className="ai-chat-input" onSubmit={onSubmit}>
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
+                placeholder="Nhập câu hỏi tư vấn..."
+                aria-label="Nhập câu hỏi tư vấn"
+              />
+              <button type="submit" disabled={!input.trim() || loading} aria-label="Gửi câu hỏi">
+                <Send size={17} />
+              </button>
+            </form>
+
+            <div className="ai-chat-fallback">
+              <a href={ZALO_URL} target="_blank" rel="noreferrer">
+                Chat Zalo
+              </a>
+              <a href={`tel:${CONTACT_PHONE}`}>
+                <Phone size={15} /> {CONTACT_PHONE}
+              </a>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <motion.button
+        className="ai-chat-toggle"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        whileHover={reduce ? undefined : { y: -3, rotateX: 6, rotateY: -4, scale: 1.02 }}
+        whileTap={reduce ? undefined : { scale: 0.97 }}
+        transition={{ type: "spring", stiffness: 360, damping: 22 }}
+        style={{ transformPerspective: 800 }}
+      >
         <MessageCircle size={22} />
         <span>
           <strong>Tư vấn AI</strong>
           <small>Phản hồi nhanh</small>
         </span>
         <Zap size={16} />
-      </button>
+      </motion.button>
     </section>
   );
 }
