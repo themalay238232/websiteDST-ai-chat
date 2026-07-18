@@ -239,7 +239,7 @@ export const packageGroups = [
   },
   {
     icon: Sparkles,
-    title: "Thiết kế - Content - Video",
+    title: "Multi Media",
     items: ["Thiết kế logo và ấn phẩm", "Viết bài quảng cáo", "Chụp ảnh sản phẩm", "Biên tập video"],
   },
   {
