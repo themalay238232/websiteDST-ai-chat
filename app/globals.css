@@ -2638,7 +2638,10 @@ textarea {
 
 .service-page-cta > div:last-child { display: flex; flex-wrap: wrap; gap: 12px; }
 
-.service-page-cta .primary-btn { background: #10161f; }
+.service-page-cta .primary-btn {
+  background: #10161f;
+  color: var(--paper);
+}
 
 .service-page-cta .ghost-btn { border-color: rgba(16, 22, 31, 0.35); }
 
