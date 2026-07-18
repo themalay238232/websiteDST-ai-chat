@@ -28,7 +28,7 @@
   --glass: rgba(16, 22, 31, 0.9);
   --shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
   --radius: 12px;
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-display: "Noto Serif", Georgia, "Times New Roman", serif;
   --font-body: "Source Sans 3", "Segoe UI", sans-serif;
 }
 
@@ -57,7 +57,7 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   font-synthesis: none;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
   letter-spacing: 0.01em;
 }
 
@@ -345,7 +345,8 @@ h1 {
   margin-bottom: 22px;
   font-size: clamp(2.65rem, 4.4vw, 5rem);
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
+  font-kerning: normal;
 }
 
 h1 span,
@@ -586,7 +587,7 @@ h3 {
 }
 
 .section-heading h2 {
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .section-heading p:last-of-type {
