@@ -78,7 +78,7 @@ async function chat(request: Request, env: Env) {
   );
 
   if (!response.ok) {
-    return json(request, { error: "AI provider failed" }, 502);
+    return json(request, { error: "AI provider failed", providerStatus: response.status }, 502);
   }
 
   const data = (await response.json()) as {
