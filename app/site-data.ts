@@ -45,6 +45,7 @@ export const stats = [
 
 export const services = [
   {
+    slug: "digital-advertising",
     icon: Megaphone,
     title: "Digital Advertising",
     text: "Triển khai quảng cáo đa nền tảng với dữ liệu, thông điệp và tối ưu liên tục.",
@@ -57,6 +58,7 @@ export const services = [
       "Không dùng ảnh minh họa cho hạng mục này vì hiệu quả quảng cáo nên được chứng minh bằng dữ liệu chiến dịch, dashboard và báo cáo thực tế.",
   },
   {
+    slug: "tiktok-shop",
     icon: ShoppingBag,
     title: "TikTok Shop Partner",
     text: "Thiết lập, quản lý và tăng trưởng gian hàng TikTok Shop từ nội dung đến vận hành.",
@@ -70,6 +72,7 @@ export const services = [
     proofCaption: "Ảnh phù hợp vì thể hiện hoạt động sản xuất nội dung/livestream, không phải ảnh minh họa ngẫu nhiên.",
   },
   {
+    slug: "design-website",
     icon: Code2,
     title: "Design & Website",
     text: "Thiết kế website, landing page và hệ thống nhận diện có tính ứng dụng cao.",
@@ -82,6 +85,7 @@ export const services = [
       "Bộ ảnh hiện tại không có ảnh màn hình website hoặc thiết kế giao diện cụ thể, nên phần này ưu tiên mô tả quy trình thay vì dùng ảnh sai ngữ cảnh.",
   },
   {
+    slug: "content-marketing",
     icon: FileText,
     title: "Content Marketing",
     text: "Xây dựng kế hoạch nội dung, kịch bản video, bài PR và content quảng cáo.",
@@ -95,6 +99,7 @@ export const services = [
     proofCaption: "Ảnh minh chứng liên quan đến quá trình chuẩn bị và sản xuất nội dung.",
   },
   {
+    slug: "studio-media",
     icon: Camera,
     title: "Studio & Media",
     text: "Sản xuất hình ảnh, video, TVC, livestream và tư liệu truyền thông chuyên nghiệp.",
@@ -108,6 +113,7 @@ export const services = [
     proofCaption: "Ảnh thể hiện đúng hoạt động sản xuất media, phù hợp với nội dung dịch vụ.",
   },
   {
+    slug: "branding",
     icon: Palette,
     title: "Branding",
     text: "Định hình chiến lược, nhận diện và truyền thông thương hiệu dài hạn.",
@@ -121,6 +127,7 @@ export const services = [
     proofCaption: "Ảnh phù hợp vì thể hiện hoạt động làm việc chiến lược và định hướng thương hiệu.",
   },
   {
+    slug: "booking-pr",
     icon: RadioTower,
     title: "Booking & PR",
     text: "Kết nối truyền thông, KOL/KOC, fanpage, báo chí và màn hình LED.",
@@ -134,6 +141,7 @@ export const services = [
     proofCaption: "Ảnh liên quan đến truyền thông sự kiện, phù hợp hơn ảnh stock hoặc minh họa chung chung.",
   },
   {
+    slug: "setup-restaurant-hotel",
     icon: Hotel,
     title: "Setup Restaurant - Hotel",
     text: "Tư vấn thị trường, thương hiệu, khai trương và marketing vận hành dịch vụ.",
@@ -147,6 +155,7 @@ export const services = [
     proofCaption: "Ảnh phù hợp vì bối cảnh thuộc nhóm nhà hàng/khách sạn, đúng với dịch vụ setup hospitality.",
   },
   {
+    slug: "phong-marketing",
     icon: Building2,
     title: "Xây dựng phòng Marketing",
     text: "Thiết lập nhân sự, quy trình, KPI và năng lực marketing nội bộ cho doanh nghiệp.",

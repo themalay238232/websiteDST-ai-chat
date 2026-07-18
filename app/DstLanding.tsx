@@ -52,6 +52,11 @@ function scrollToSection(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function openService(slug: string) {
+  window.location.hash = `/dich-vu/${slug}`;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function BrandLogo({ variant = "group", className = "" }: { variant?: "group" | "media"; className?: string }) {
   const src = variant === "media" ? "assets/logo-dst-marketing-media.png" : "assets/logo-dst-group.png";
   const alt = variant === "media" ? "DST Marketing Media" : "DST Group - Dịch vụ tận tâm - Nâng tầm thương hiệu";
@@ -280,96 +285,9 @@ function ContactForm() {
   );
 }
 
-function ServiceDetailModal({
-  service,
-  onClose,
-}: {
-  service: ServiceItem | null;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    if (!service) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    document.body.classList.add("modal-open");
-    window.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.body.classList.remove("modal-open");
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [service, onClose]);
-
-  if (!service) return null;
-
-  const Icon = service.icon;
-  const hasImage = "proofImage" in service && service.proofImage;
-
-  return (
-    <div className="service-modal" role="dialog" aria-modal="true" aria-labelledby="service-modal-title">
-      <button className="modal-backdrop" onClick={onClose} aria-label="Đóng chi tiết dịch vụ" />
-      <article className="service-modal-card">
-        <button className="modal-close" onClick={onClose} aria-label="Đóng chi tiết dịch vụ">
-          <X size={20} />
-        </button>
-        <div className="modal-intro">
-          <div className="modal-icon">
-            <Icon size={30} />
-          </div>
-          <p className="eyebrow">Chi tiết dịch vụ</p>
-          <h2 id="service-modal-title">{service.title}</h2>
-          <p>{service.detail}</p>
-        </div>
-
-        <div className={`modal-body ${hasImage ? "" : "no-proof-image"}`}>
-          {hasImage ? (
-            <figure className="service-proof">
-              <img src={service.proofImage} alt={service.proofAlt} loading="lazy" decoding="async" />
-              <figcaption>{service.proofCaption}</figcaption>
-            </figure> ) : null}
-
-          <div className="modal-detail-grid">
-            <section>
-              <h3>Phù hợp với</h3>
-              <p>{service.fit}</p>
-            </section>
-            <section>
-              <h3>Hạng mục bàn giao</h3>
-              <ul>
-                {service.deliverables.map((item) => (
-                  <li key={item}>
-                    <CheckIcon size={16} /> {item}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </div>
-        </div>
-
-        <div className="modal-actions">
-          <button
-            className="primary-btn"
-            onClick={() => {
-              onClose();
-              scrollToSection("contact");
-            }}
-          >
-            Tư vấn dịch vụ này <ChevronRight size={18} />
-          </button>
-          <button className="ghost-btn" onClick={onClose}>
-            Xem dịch vụ khác
-          </button>
-        </div>
-      </article>
-    </div>
-  );
-}
-
-export function DstLanding() {
+function LandingHome() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const reduce = useReducedMotion();
 
@@ -545,10 +463,9 @@ export function DstLanding() {
         <section id="services" className="section">
           <div className="section-heading reveal">
             <p className="eyebrow">Hệ sinh thái dịch vụ</p>
-            <h2>Giải pháp toàn diện</h2>
+            <h2>Dịch vụ theo mục tiêu kinh doanh</h2>
             <p>
-              Từ chiến lược đến thực thi, DST Group cung cấp đầy đủ giải pháp giúp doanh nghiệp xây dựng thương hiệu và
-              tăng trưởng doanh thu.
+              Mỗi dịch vụ được xây dựng theo mục tiêu cụ thể, phạm vi triển khai rõ ràng và khả năng đo lường thực tế.
             </p>
           </div>
           <div className="service-grid">
@@ -556,7 +473,6 @@ export function DstLanding() {
               const Icon = service.icon;
               return (
                 <Tilt3DCard className="service-card" key={service.title} delay={index * 0.05} strength={5}>
-                  <span className="card-number">{String(index + 1).padStart(2, "0")}</span>
                   <div className="service-icon-wrap">
                     <Icon className="service-icon" size={28} />
                   </div>
@@ -567,7 +483,7 @@ export function DstLanding() {
                       <span key={tag}>{tag}</span>
                     ))}
                   </div>
-                  <button onClick={() => setSelectedService(service)}>
+                  <button onClick={() => openService(service.slug)}>
                     Xem chi tiết <ArrowUpRight size={16} />
                   </button>
                 </Tilt3DCard>
@@ -657,23 +573,23 @@ export function DstLanding() {
             <p className="eyebrow">Dự án tiêu biểu</p>
             <h2>Dấu ấn triển khai</h2>
           </div>
-          <div className="project-rail">
+          <div className="project-list">
             {projects.map((project, index) => (
               <motion.article
-                className="project-card"
+                className="project-row"
                 key={project.title}
                 initial={reduce ? false : { opacity: 0, x: 40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ delay: index * 0.08, duration: 0.5 }}
               >
-                <img src={project.img} alt={project.title} loading="lazy" decoding="async" />
-                <div className="project-overlay">
+                <span className="project-index">{String(index + 1).padStart(2, "0")}</span>
+                <div>
                   <span>{project.type}</span>
                   <h3>{project.title}</h3>
-                  <p>{project.goal}</p>
-                  <strong>{project.result}</strong>
                 </div>
+                <p>{project.goal}</p>
+                <strong>{project.result}</strong>
               </motion.article>
             ))}
           </div>
@@ -758,8 +674,6 @@ export function DstLanding() {
         </section>
       </main>
 
-      <ServiceDetailModal service={selectedService} onClose={() => setSelectedService(null)} />
-
       <footer className="site-footer">
         <div>
           <BrandLogo variant="media" />
@@ -805,5 +719,102 @@ export function DstLanding() {
       <AiConsultantChat />
     </>
   );
+}
+
+function ServicePage({ service }: { service: ServiceItem }) {
+  const Icon = service.icon;
+  const hasImage = "proofImage" in service && service.proofImage;
+
+  return (
+    <>
+      <header className="site-header is-scrolled service-page-header">
+        <a className="brand" href="#/" aria-label="Về trang chủ">
+          <BrandLogo />
+        </a>
+        <nav className="desktop-nav" aria-label="Menu chính">
+          <a href="#/">Trang chủ</a>
+          <a href="#/">Giới thiệu</a>
+          <a href="#/">Dịch vụ</a>
+          <a href="#/">Dự án</a>
+          <a href="#/">Liên hệ</a>
+        </nav>
+        <a className="header-cta" href="#/">Nhận tư vấn</a>
+      </header>
+
+      <main className="service-page">
+        <section className="service-page-hero">
+          <div>
+            <a className="back-link" href="#/">← Tất cả dịch vụ</a>
+            <div className="service-page-icon"><Icon size={32} /></div>
+            <p className="eyebrow">Dịch vụ DST Group</p>
+            <h1>{service.title}</h1>
+            <p>{service.detail}</p>
+            <div className="tag-list">
+              {service.tags.map((tag) => <span key={tag}>{tag}</span>)}
+            </div>
+          </div>
+          {hasImage ? (
+            <figure className="service-page-image">
+              <img src={service.proofImage} alt={service.proofAlt} />
+              <figcaption>{service.proofCaption}</figcaption>
+            </figure>
+          ) : (
+            <div className="service-page-note">{service.proofNote}</div>
+          )}
+        </section>
+
+        <section className="service-page-grid">
+          <article>
+            <p className="eyebrow">Phù hợp với</p>
+            <h2>Đúng nhu cầu, đúng giai đoạn</h2>
+            <p>{service.fit}</p>
+          </article>
+          <article>
+            <p className="eyebrow">Hạng mục bàn giao</p>
+            <h2>Phạm vi triển khai</h2>
+            <ul>
+              {service.deliverables.map((item) => <li key={item}><CheckIcon size={17} />{item}</li>)}
+            </ul>
+          </article>
+        </section>
+
+        <section className="service-page-cta">
+          <div>
+            <p className="eyebrow">Trao đổi cùng DST</p>
+            <h2>Nhận tư vấn cho {service.title}</h2>
+          </div>
+          <div>
+            <a className="primary-btn" href="https://zalo.me/0328247888" target="_blank" rel="noreferrer">Trao đổi qua Zalo <ArrowUpRight size={18} /></a>
+            <a className="ghost-btn" href="tel:0328247888">Gọi 0328 247 888</a>
+          </div>
+        </section>
+
+        <section className="service-directory">
+          <p className="eyebrow">Dịch vụ khác</p>
+          <div>
+            {services.filter((item) => item.slug !== service.slug).map((item) => (
+              <a href={`#/dich-vu/${item.slug}`} key={item.slug}>{item.title}<ArrowUpRight size={16} /></a>
+            ))}
+          </div>
+        </section>
+      </main>
+      <AiConsultantChat />
+    </>
+  );
+}
+
+export function DstLanding() {
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const updateHash = () => setHash(window.location.hash);
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
+  }, []);
+
+  const match = hash.match(/^#\/dich-vu\/([a-z0-9-]+)$/);
+  const service = match ? services.find((item) => item.slug === match[1]) : undefined;
+  return service ? <ServicePage service={service} /> : <LandingHome />;
 }
 
