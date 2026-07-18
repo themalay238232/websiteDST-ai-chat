@@ -2556,6 +2556,72 @@ textarea {
 
 .service-page-grid li svg { flex: 0 0 auto; margin-top: 3px; color: var(--accent-bright); }
 
+.service-highlights {
+  padding: 64px 0;
+  border-top: 1px solid var(--line);
+}
+
+.service-highlights-heading {
+  max-width: 720px;
+  margin-bottom: 30px;
+}
+
+.service-highlights-heading h2 {
+  margin: 8px 0 14px;
+  font-size: 2.5rem;
+}
+
+.service-highlights-heading > p:last-child {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.service-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.service-highlights-grid article {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  min-height: 108px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  background: rgba(16, 22, 31, 0.66);
+  transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.service-highlights-grid article:hover {
+  transform: translateY(-3px);
+  border-color: rgba(77, 182, 169, 0.38);
+  background: rgba(18, 29, 38, 0.82);
+}
+
+.service-highlights-grid svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--accent-bright);
+}
+
+.service-highlights-grid article:nth-child(2n) svg {
+  color: var(--jade-soft);
+}
+
+.service-highlights-grid article:nth-child(3n) svg {
+  color: #ef8b63;
+}
+
+.service-highlights-grid p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
 .service-page-cta {
   display: flex;
   justify-content: space-between;
@@ -2608,13 +2674,14 @@ textarea {
 .service-directory a:nth-child(even) { padding-left: 28px; }
 
 @media (max-width: 760px) {
-  .project-row, .service-page-hero, .service-page-grid, .service-directory > div { grid-template-columns: 1fr; }
+  .project-row, .service-page-hero, .service-page-grid, .service-highlights-grid, .service-directory > div { grid-template-columns: 1fr; }
   .project-row { gap: 10px; }
   .service-page { width: min(100% - 32px, 1180px); padding-top: 112px; }
   .service-page-hero { gap: 30px; }
   .service-page h1 { font-size: 2.7rem; }
   .service-page-cta { display: grid; padding: 28px; }
   .service-page-cta h2 { font-size: 2rem; }
+  .service-highlights-heading h2 { font-size: 2rem; }
   .service-page-header .header-cta { display: inline-flex; min-height: 44px; padding-inline: 16px; }
   .service-directory a:nth-child(odd), .service-directory a:nth-child(even) { padding-left: 0; padding-right: 0; }
 }

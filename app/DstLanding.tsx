@@ -661,7 +661,9 @@ function LandingHome() {
             <p>
               Công ty Cổ phần Tập Đoàn DST
               <br />
-              Địa chỉ: Hạ Long, Quảng Ninh
+              Địa chỉ: Đường Cao Hà, phường Cao Xanh, Quảng Ninh
+              <br />
+              (Đối diện Trường THPT Ngô Quyền)
             </p>
             <a href="tel:0328247888">
               <Phone size={18} /> 0328 247 888
@@ -780,6 +782,22 @@ function ServicePage({ service }: { service: ServiceItem }) {
               {service.deliverables.map((item) => <li key={item}><CheckIcon size={17} />{item}</li>)}
             </ul>
           </article>
+        </section>
+
+        <section className="service-highlights">
+          <div className="service-highlights-heading">
+            <p className="eyebrow">Năng lực triển khai</p>
+            <h2>Chi tiết dịch vụ</h2>
+            <p>Các hạng mục được lựa chọn và điều chỉnh theo mục tiêu, ngành hàng và giai đoạn phát triển của doanh nghiệp.</p>
+          </div>
+          <div className="service-highlights-grid">
+            {service.highlights.map((item) => (
+              <article key={item}>
+                <CheckIcon size={19} />
+                <p>{item}</p>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="service-page-cta">
