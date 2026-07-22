@@ -62,7 +62,7 @@ function normalizeMessages(input: unknown) {
     .filter(Boolean);
 }
 
-async function callOpenAI(env: Env, messages: Array<{ role: string; content: string }>, lead: unknown) {
+async function callOpenAI(env: Env, messages: Array<{ role: string; content: string }>, lead: unknown, pageContext: string) {
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -76,7 +76,7 @@ async function callOpenAI(env: Env, messages: Array<{ role: string; content: str
           role: "system",
           content:
             "Ban la tro ly tu van khach hang cua DST Group. Tra loi tieng Viet ngan gon, lich su, uu tien thu thap ten, so dien thoai, nhu cau. Neu khong chac, moi khach lien he Zalo/dien thoai. Khong noi ve API key hoac cau hinh noi bo.\n\n" +
-            DST_SERVICE_CONTEXT,
+            DST_SERVICE_CONTEXT + (pageContext ? `\nNguoi dung dang xem: ${pageContext}` : ""),
         },
         {
           role: "user",
@@ -94,7 +94,7 @@ async function callOpenAI(env: Env, messages: Array<{ role: string; content: str
   return data.output_text;
 }
 
-async function callGemini(env: Env, messages: Array<{ role: string; content: string }>, lead: unknown) {
+async function callGemini(env: Env, messages: Array<{ role: string; content: string }>, lead: unknown, pageContext: string) {
   const model = env.GEMINI_MODEL || "gemini-1.5-flash";
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
@@ -107,7 +107,7 @@ async function callGemini(env: Env, messages: Array<{ role: string; content: str
             {
               text:
                 "Ban la tro ly tu van khach hang cua DST Group. Tra loi tieng Viet ngan gon, lich su, uu tien thu thap ten, so dien thoai, nhu cau. Neu khong chac, moi khach lien he Zalo/dien thoai. Khong noi ve API key hoac cau hinh noi bo.\n\n" +
-                DST_SERVICE_CONTEXT,
+                DST_SERVICE_CONTEXT + (pageContext ? `\nNguoi dung dang xem: ${pageContext}` : ""),
             },
           ],
         },
@@ -135,9 +135,10 @@ async function handleChatProxy(request: Request, env: Env) {
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS_HEADERS });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, { status: 405 });
 
-  const body = (await request.json().catch(() => null)) as { messages?: unknown; lead?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { messages?: unknown; lead?: unknown; pageContext?: unknown } | null;
   const messages = normalizeMessages(body?.messages) as Array<{ role: string; content: string }>;
   const lead = body?.lead ?? {};
+  const pageContext = typeof body?.pageContext === "string" ? body.pageContext.slice(0, 160) : "";
 
   if (!messages.length) {
     return json({ error: "Missing messages" }, { status: 400 });
@@ -145,21 +146,15 @@ async function handleChatProxy(request: Request, env: Env) {
 
   try {
     const answer = env.OPENAI_API_KEY
-      ? await callOpenAI(env, messages, lead)
+      ? await callOpenAI(env, messages, lead, pageContext)
       : env.GEMINI_API_KEY
-        ? await callGemini(env, messages, lead)
+        ? await callGemini(env, messages, lead, pageContext)
         : null;
 
     if (!answer) return json({ error: "AI provider is not configured" }, { status: 503 });
     return json({ answer });
-  } catch (error) {
-    return json(
-      {
-        error: "AI provider failed",
-        detail: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 502 },
-    );
+  } catch {
+    return json({ error: "AI provider failed" }, { status: 502 });
   }
 }
 

@@ -1,5 +1,5 @@
-import { DstLanding } from "./DstLanding";
+import { WebsiteApp } from "./WebsiteApp";
 
 export default function Home() {
-  return <DstLanding />;
+  return <WebsiteApp initialPath="/" />;
 }

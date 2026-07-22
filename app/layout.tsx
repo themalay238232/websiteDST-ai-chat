@@ -2,64 +2,41 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const description =
-  "DST Group cung cấp dịch vụ Marketing, quảng cáo, TikTok Shop, thiết kế website, sản xuất Media, Branding và xây dựng phòng Marketing cho doanh nghiệp.";
+  "DST Group cung cấp giải pháp Marketing, Media, Branding và thiết kế website theo nhu cầu thực tế của doanh nghiệp.";
 
 export const metadata: Metadata = {
-  title: "DST Group | Marketing, Media và Branding toàn diện",
+  title: {
+    default: "DST Group | Marketing, Media & Branding",
+    template: "%s | DST Group",
+  },
   description,
-  keywords: [
-    "DST Group",
-    "Marketing",
-    "Media",
-    "Branding",
-    "TikTok Shop",
-    "Thiết kế website",
-    "Quảng cáo đa nền tảng",
-  ],
-  metadataBase: new URL("https://dstgroup.vn"),
+  metadataBase: new URL("https://theluc205.github.io/websiteDST-ai-chat/"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "DST Group | Marketing, Media và Branding toàn diện",
+    title: "DST Group | Marketing, Media & Branding",
     description,
-    url: "https://dstgroup.vn",
+    url: "https://theluc205.github.io/websiteDST-ai-chat/",
     siteName: "DST Group Marketing & Media",
     locale: "vi_VN",
     type: "website",
     images: [
       {
-        url: "assets/logo-dst-marketing-media.png",
-        width: 2048,
-        height: 1152,
-        alt: "DST Group Marketing & Media",
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "DST Group Marketing, Media & Branding",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DST Group | Marketing, Media và Branding toàn diện",
+    title: "DST Group | Marketing, Media & Branding",
     description,
-    images: ["assets/logo-dst-marketing-media.png"],
+    images: ["/og.png"],
   },
-};
-
-const schema = {
-  "@context": "https://schema.org",
-  "@type": ["Organization", "LocalBusiness"],
-  name: "Công ty Cổ phần Tập Đoàn DST",
-  alternateName: "DST Group Marketing & Media",
-  url: "https://dstgroup.vn",
-  email: "info@dstgroup.vn",
-  telephone: "+84328247888",
-  address: {
-    "@type": "PostalAddress",
-    addressLocality: "Hạ Long",
-    addressRegion: "Quảng Ninh",
-    addressCountry: "VN",
-  },
-  slogan: "Dịch vụ tận tâm - Nâng tầm thương hiệu",
-  sameAs: ["https://dstgroup.vn"],
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -72,9 +49,9 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
-        <link rel="icon" href="favicon.png" type="image/png" sizes="512x512" />
-        <link rel="shortcut icon" href="favicon.png" />
-        <link rel="apple-touch-icon" href="favicon.png" />
+        <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
+        <link rel="shortcut icon" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -82,10 +59,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>
-        {children}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

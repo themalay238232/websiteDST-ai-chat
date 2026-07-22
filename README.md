@@ -1,153 +1,79 @@
-# vinext-starter
+# DST Group Website
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+Website doanh nghiệp đa trang cho DST Group, giữ nhận diện vàng cam và xanh xám đậm từ logo gốc. Dự án dùng React 19, Vinext cho ứng dụng/Worker và Vite để xuất bản GitHub Pages.
 
-## Prerequisites
+## Yêu cầu môi trường
 
-- Node.js `>=22.13.0`
+- Node.js 22 trở lên
+- npm 10 trở lên
 
-## Quick Start
+## Cài đặt và chạy local
 
 ```bash
 npm install
 npm run dev
+```
+
+Mở URL do Vinext in ra trong terminal. Bản GitHub Pages có thể xem riêng bằng `npm run build:github-pages` rồi phục vụ thư mục `outputs/gh-pages-dist` với một static server.
+
+## Kiểm tra và build
+
+```bash
+npm run lint
+npm run typecheck
 npm run build
+npm run build:github-pages
+npm test
 ```
 
-This starter does not use `wrangler.jsonc`.
+- `npm run build`: kiểm tra ứng dụng Vinext/Worker.
+- `npm run build:github-pages`: tạo static routes, `404.html` fallback, `sitemap.xml`, `robots.txt` và `.nojekyll` trong `outputs/gh-pages-dist`.
+- `npm test`: kiểm tra type, build, các route công khai, SEO cơ bản, fallback GitHub Pages và việc không để AI key trong frontend.
 
-## Included Shape
+## Cấu hình AI Chat
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+AI Chat không lưu API key trong trình duyệt. Widget gửi yêu cầu tới một proxy backend/Cloudflare Worker, sau đó tự chuyển sang tư vấn dựa trên dữ liệu dịch vụ nếu API không khả dụng.
 
-## Workspace Auth Headers
+- Vinext: cấu hình `OPENAI_API_KEY` hoặc `GEMINI_API_KEY` trong biến môi trường của Worker, không commit `.env`.
+- GitHub Pages: đặt URL proxy trong `gh-pages-static/index.html` tại `window.__DST_CHAT_CONFIG__.apiUrl`.
+- Worker AI độc lập: xem `ai-chat-worker/src/index.ts`; origin production được giới hạn tới `https://theluc205.github.io` và localhost cho phát triển.
 
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
+## Cấu hình form
 
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm run build:github-pages`: build the static GitHub Pages version into `outputs/gh-pages-dist`
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## AI Chat Consultant
-
-The site includes a floating DST consultation chat widget in the bottom-right
-corner. It supports:
-
-- greeting script and quick questions for DST services
-- lead capture: name, phone number, and consultation need
-- answers grounded in the listed DST services
-- fallback links to Zalo and phone when AI is unavailable
-- optional backend AI proxy at `/api/chat`
-
-Do not put OpenAI or Gemini API keys in frontend code. Copy `.env.example` to
-`.env` only on the backend/serverless environment and set one provider:
-
-```bash
-OPENAI_API_KEY=...
-OPENAI_MODEL=gpt-4.1-mini
-```
-
-or:
-
-```bash
-GEMINI_API_KEY=...
-GEMINI_MODEL=gemini-1.5-flash
-```
-
-For the vinext/Cloudflare Worker deployment, `/api/chat` is handled by
-`worker/index.ts`. For GitHub Pages, deploy the chat proxy separately, then set
-the proxy URL in `gh-pages-static/index.html`:
+Form có validate họ tên, số điện thoại Việt Nam, email, độ dài nội dung, consent, honeypot và giới hạn gửi lại 30 giây. Cấu hình endpoint backend tại:
 
 ```html
-<script>
-  window.__DST_CHAT_CONFIG__ = {
-    apiUrl: "https://your-chat-proxy.example.com/api/chat",
-  };
-</script>
+window.__DST_FORM_CONFIG__ = {
+  endpoint: "https://your-secure-backend.example.com/contact"
+};
 ```
 
-If `apiUrl` is empty on GitHub Pages, the widget still works in safe fallback
-mode using the local DST service data and direct Zalo/phone handoff.
+Không đặt token, secret hoặc URL webhook riêng tư trong repository. Khi endpoint chưa có, giao diện hiển thị lỗi rõ ràng và hướng người dùng sang Zalo/điện thoại thay vì báo gửi thành công giả.
 
-## GitHub Pages Deploy
+## Deploy GitHub Pages
 
-The public GitHub Pages version is a Vite static build in `gh-pages-static/`.
+Workflow `.github/workflows/deploy-pages.yml` chạy khi push lên `main`:
 
-```bash
-npm install
-npm run build:github-pages
-```
+1. `npm ci`
+2. lint và TypeScript check
+3. `npm run build:github-pages`
+4. upload `outputs/gh-pages-dist`
+5. deploy bằng GitHub Pages Actions chính thức
 
-Publish the generated `outputs/gh-pages-dist` folder to GitHub Pages. The Vite
-base path is already set to `/websiteDST/` for
-`https://themalay238232.github.io/websiteDST/`.
+Trong repository settings, chọn **Pages > Source > GitHub Actions**. URL dự kiến là:
 
-## Learn More
+`https://theluc205.github.io/websiteDST-ai-chat/`
 
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+Vite dùng đúng base path `/websiteDST-ai-chat/`. Mỗi route đã có static HTML; các route không tồn tại quay về SPA qua `404.html`, nên refresh trực tiếp tại các URL như `/websiteDST-ai-chat/dich-vu/marketing` vẫn hoạt động.
+
+## Dữ liệu quản trị cần xác nhận
+
+Các nội dung mẫu tập trung trong `data/`:
+
+- `data/company.ts`: thông tin pháp lý, địa chỉ, giờ làm việc, số liệu, khách hàng và testimonial.
+- `data/services.ts`: phạm vi dịch vụ, hạng mục, FAQ, ảnh minh chứng nếu thực sự có.
+- `data/projects.ts`: khách hàng, số liệu kết quả, case study và ảnh dự án.
+- `data/articles.ts`: bài viết khởi tạo có thể thay bằng CMS/API.
+- `data/careers.ts`: vị trí tuyển dụng và thông tin nhân sự.
+
+Mọi dữ liệu chưa được DST Group xác nhận được gắn `TODO: Cập nhật thông tin chính thức của DST Group`. Không thay bằng số liệu, thông tin pháp lý hoặc ảnh dự án chưa được phê duyệt.

@@ -12,7 +12,7 @@ type ChatMessage = {
   content: string;
 };
 
-const ALLOWED_ORIGIN = "https://theluc205.github.io";
+const PRODUCTION_ORIGIN = "https://theluc205.github.io";
 
 const DST_CONTEXT = `
 Ban la tro ly tu van cua DST Group tai Ha Long, Quang Ninh.
@@ -23,8 +23,11 @@ Tra loi bang tieng Viet, ngan gon, lich su va chi dua tren thong tin DST nay. Kh
 
 function corsHeaders(request: Request) {
   const origin = request.headers.get("Origin");
+  const allowedOrigin = origin && (origin === PRODUCTION_ORIGIN || /^http:\/\/localhost(?::\d+)?$/.test(origin))
+    ? origin
+    : PRODUCTION_ORIGIN;
   return {
-    "Access-Control-Allow-Origin": origin === ALLOWED_ORIGIN ? origin : ALLOWED_ORIGIN,
+    "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     Vary: "Origin",
@@ -58,12 +61,14 @@ function normalizeMessages(value: unknown): ChatMessage[] {
 }
 
 async function chat(request: Request, env: Env) {
-  const body = (await request.json().catch(() => null)) as { messages?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { messages?: unknown; pageContext?: unknown } | null;
   const messages = normalizeMessages(body?.messages);
+  const pageContext = typeof body?.pageContext === "string" ? body.pageContext.slice(0, 160) : "";
   if (!messages.length) return json(request, { error: "Missing messages" }, 400);
 
   try {
-    const conversation = [{ role: "system", content: DST_CONTEXT }, ...messages];
+    const context = pageContext ? `\nNguoi dung dang xem: ${pageContext}. Uu tien tu van theo ngu canh nay.` : "";
+    const conversation = [{ role: "system", content: DST_CONTEXT + context }, ...messages];
     let result = await env.AI.run("@cf/zai-org/glm-4.7-flash", { messages: conversation });
     let answer = result.response?.trim() ?? result.choices?.[0]?.message?.content?.trim();
 
@@ -75,12 +80,12 @@ async function chat(request: Request, env: Env) {
     return answer
       ? json(request, { answer })
       : json(request, { error: "AI returned no answer" }, 502);
-  } catch (error) {
+  } catch {
     return json(request, { error: "AI provider failed" }, 502);
   }
 }
 
-export default {
+const worker = {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (request.method === "OPTIONS") {
@@ -90,3 +95,5 @@ export default {
     return json(request, { error: "Not found" }, 404);
   },
 };
+
+export default worker;

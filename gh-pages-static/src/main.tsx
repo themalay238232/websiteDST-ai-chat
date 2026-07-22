@@ -1,10 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "../../app/globals.css";
-import { DstLanding } from "../../app/DstLanding";
+import { WebsiteApp } from "../../app/WebsiteApp";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <DstLanding />
+    <WebsiteApp />
   </React.StrictMode>,
 );

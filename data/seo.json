@@ -1,0 +1,68 @@
+{
+  "/": {
+    "title": "DST Group | Marketing, Media & Branding",
+    "description": "DST Group cung cấp giải pháp Marketing, Media, Branding, thiết kế website và tổ chức triển khai theo nhu cầu doanh nghiệp."
+  },
+  "/gioi-thieu": {
+    "title": "Giới thiệu DST Group | Marketing, Media & Branding",
+    "description": "Tìm hiểu định hướng, giá trị, năng lực và cách DST Group đồng hành cùng doanh nghiệp."
+  },
+  "/dich-vu": {
+    "title": "Dịch vụ DST Group | Marketing, Media, Branding",
+    "description": "Khám phá các nhóm dịch vụ Marketing, Media, Branding, Website, Truyền thông và Tổ chức sự kiện của DST Group."
+  },
+  "/dich-vu/marketing": {
+    "title": "Marketing & Quảng cáo | DST Group",
+    "description": "Giải pháp Marketing và quảng cáo theo mục tiêu kinh doanh, có kế hoạch triển khai rõ ràng."
+  },
+  "/dich-vu/media": {
+    "title": "Media & Sản xuất nội dung | DST Group",
+    "description": "Sản xuất ảnh, video và tư liệu truyền thông phục vụ nhiều điểm chạm thương hiệu."
+  },
+  "/dich-vu/branding": {
+    "title": "Branding & Nhận diện | DST Group",
+    "description": "Định hướng và xây dựng hệ thống nhận diện thương hiệu có khả năng ứng dụng."
+  },
+  "/dich-vu/thiet-ke-website": {
+    "title": "Thiết kế Website | DST Group",
+    "description": "Thiết kế website và landing page theo cấu trúc nội dung rõ ràng, responsive và dễ tiếp cận."
+  },
+  "/dich-vu/truyen-thong": {
+    "title": "Truyền thông & Nội dung | DST Group",
+    "description": "Xây dựng kế hoạch truyền thông, nội dung và thông điệp nhất quán theo từng giai đoạn."
+  },
+  "/dich-vu/to-chuc-su-kien": {
+    "title": "Tổ chức sự kiện | DST Group",
+    "description": "Lập kế hoạch, sản xuất và truyền thông cho các hoạt động sự kiện và ra mắt thương hiệu."
+  },
+  "/du-an": {
+    "title": "Dự án | DST Group",
+    "description": "Xem các dự án mẫu theo lĩnh vực và nhóm dịch vụ DST Group đã triển khai."
+  },
+  "/du-an/marketing-nha-hang": { "title": "Dự án Marketing nhà hàng | DST Group", "description": "Case study mẫu về tổ chức nội dung và truyền thông ngành F&B." },
+  "/du-an/marketing-khach-san": { "title": "Dự án Marketing khách sạn | DST Group", "description": "Case study mẫu về nội dung và hiện diện số cho dự án lưu trú." },
+  "/du-an/thuong-hieu-noi-that": { "title": "Dự án thương hiệu nội thất | DST Group", "description": "Case study mẫu về định hướng nhận diện và thông điệp thương hiệu." },
+  "/du-an/tiktok-shop": { "title": "Dự án TikTok Shop | DST Group", "description": "Case study mẫu về nội dung và quy trình phối hợp cho thương mại số." },
+  "/du-an/quay-tvc-doanh-nghiep": { "title": "Dự án quay TVC doanh nghiệp | DST Group", "description": "Case study mẫu về sản xuất tư liệu video thương hiệu." },
+  "/du-an/truyen-thong-su-kien": { "title": "Dự án truyền thông sự kiện | DST Group", "description": "Case study mẫu về phối hợp truyền thông và tư liệu sự kiện." },
+  "/tin-tuc": {
+    "title": "Tin tức & Góc nhìn | DST Group",
+    "description": "Bài viết về Marketing, Website, Media, Branding, TikTok Shop và truyền thông sự kiện."
+  },
+  "/tin-tuc/xay-dung-ke-hoach-marketing-tu-muc-tieu-kinh-doanh": { "title": "Xây dựng kế hoạch marketing từ mục tiêu kinh doanh | DST Group", "description": "Góc nhìn mẫu về cách bắt đầu kế hoạch marketing từ ưu tiên kinh doanh." },
+  "/tin-tuc/website-doanh-nghiep-can-co-cau-truc-noi-dung-nao": { "title": "Website doanh nghiệp nên bắt đầu từ cấu trúc nào? | DST Group", "description": "Góc nhìn mẫu về cấu trúc nội dung website doanh nghiệp." },
+  "/tin-tuc/quy-trinh-san-xuat-video-thuong-hieu": { "title": "Quy trình sản xuất video thương hiệu | DST Group", "description": "Góc nhìn mẫu về quy trình video từ brief đến bàn giao." },
+  "/tin-tuc/khi-nao-doanh-nghiep-can-lam-moi-nhan-dien": { "title": "Khi nào doanh nghiệp cần làm mới nhận diện? | DST Group", "description": "Góc nhìn mẫu về những thời điểm cần rà soát nhận diện thương hiệu." },
+  "/tin-tuc/noi-dung-tiktok-shop-can-phoi-hop-voi-van-hanh": { "title": "Nội dung TikTok Shop và vận hành | DST Group", "description": "Góc nhìn mẫu về sự phối hợp giữa nội dung, gian hàng và vận hành." },
+  "/tin-tuc/truyen-thong-su-kien-khong-chi-la-ngay-dien-ra": { "title": "Truyền thông sự kiện không chỉ là ngày diễn ra | DST Group", "description": "Góc nhìn mẫu về truyền thông trước, trong và sau sự kiện." },
+  "/tuyen-dung": {
+    "title": "Tuyển dụng | DST Group",
+    "description": "Khám phá môi trường, văn hóa làm việc và các vị trí mẫu cần xác nhận tại DST Group."
+  },
+  "/lien-he": {
+    "title": "Liên hệ DST Group | Nhận tư vấn",
+    "description": "Liên hệ DST Group qua form tư vấn, điện thoại, email hoặc Zalo."
+  },
+  "/chinh-sach-bao-mat": { "title": "Chính sách bảo mật | DST Group", "description": "Thông tin về nguyên tắc xử lý dữ liệu liên hệ trên website DST Group." },
+  "/dieu-khoan-su-dung": { "title": "Điều khoản sử dụng | DST Group", "description": "Điều khoản sử dụng nội dung và biểu mẫu trên website DST Group." }
+}
