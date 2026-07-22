@@ -131,6 +131,13 @@ the proxy URL in `gh-pages-static/index.html`:
 </script>
 ```
 
+The production widget now uses
+`https://dst-group-messenger-ai.longv7393.workers.dev/api/web-chat`. It shares
+the same Gemini, DST knowledge, maps, images, and reply-quality pipeline as the
+Messenger bot. The browser sends only `{ sessionId, message, pageContext }`;
+API keys stay on the Worker and each browser keeps an isolated anonymous chat
+session.
+
 If `apiUrl` is empty on GitHub Pages, the widget still works in safe fallback
 mode using the local DST service data and direct Zalo/phone handoff.
 
@@ -144,8 +151,8 @@ npm run build:github-pages
 ```
 
 Publish the generated `outputs/gh-pages-dist` folder to GitHub Pages. The Vite
-base path is already set to `/websiteDST/` for
-`https://themalay238232.github.io/websiteDST/`.
+base path is already set to `/websiteDST-ai-chat/` for
+`https://themalay238232.github.io/websiteDST-ai-chat/`.
 
 ## Learn More
 

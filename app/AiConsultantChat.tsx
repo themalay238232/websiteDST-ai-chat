@@ -2,25 +2,19 @@
 
 import { Bot, MessageCircle, Phone, Send, User, X, Zap } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { services } from "./site-data";
 
 type ChatRole = "assistant" | "user";
-
-type ChatMessage = {
-  id: string;
-  role: ChatRole;
-  text: string;
-};
-
-type LeadProfile = {
-  name: string;
-  phone: string;
-  need: string;
-};
+type ChatImage = { id: string; url: string; alt: string; caption: string; sourceUrl?: string };
+type ChatMessage = { id: string; role: ChatRole; text: string; images?: ChatImage[] };
+type LeadProfile = { name: string; phone: string; need: string };
 
 const CONTACT_PHONE = "0328247888";
 const ZALO_URL = "https://zalo.me/0328247888";
+const WEB_CHAT_ENDPOINT = "https://dst-group-messenger-ai.longv7393.workers.dev/api/web-chat";
+const CHAT_HISTORY_KEY = "dst-ai-chat-history-v2";
+const CHAT_SESSION_KEY = "dst-web-chat-session-v1";
 
 const serviceKnowledge = services.map((service) => ({
   title: service.title,
@@ -34,16 +28,24 @@ const quickQuestions = [
   "Tôi muốn chạy quảng cáo",
   "Tư vấn TikTok Shop",
   "Cần thiết kế website",
-  "Báo giá media/branding",
+  "Cho tôi xem ảnh dự án khách sạn",
 ];
 
 const greetings =
   "Xin chào, tôi là trợ lý tư vấn DST Group. Bạn có thể chọn câu hỏi nhanh hoặc nhập nhu cầu để tôi gợi ý dịch vụ phù hợp.";
 
 function getRuntimeApiUrl() {
-  if (typeof window === "undefined") return "/api/chat";
+  if (typeof window === "undefined") return WEB_CHAT_ENDPOINT;
   const config = (window as Window & { __DST_CHAT_CONFIG__?: { apiUrl?: string } }).__DST_CHAT_CONFIG__;
-  return config?.apiUrl ?? "/api/chat";
+  return config?.apiUrl || WEB_CHAT_ENDPOINT;
+}
+
+function getSessionId() {
+  const stored = window.localStorage.getItem(CHAT_SESSION_KEY);
+  if (stored) return stored;
+  const sessionId = crypto.randomUUID();
+  window.localStorage.setItem(CHAT_SESSION_KEY, sessionId);
+  return sessionId;
 }
 
 function normalize(value: string) {
@@ -76,23 +78,21 @@ function buildLocalAnswer(question: string, lead: LeadProfile) {
   ].join("\n\n");
 }
 
-async function requestAiAnswer(messages: ChatMessage[], lead: LeadProfile) {
-  const apiUrl = getRuntimeApiUrl();
-  if (!apiUrl) throw new Error("Chat proxy is not configured");
-  const response = await fetch(apiUrl, {
+async function requestAiAnswer(message: string) {
+  const response = await fetch(getRuntimeApiUrl(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      messages: messages.slice(-8).map(({ role, text }) => ({ role, content: text })),
-      lead,
-      services: serviceKnowledge,
+      sessionId: getSessionId(),
+      message,
+      pageContext: window.location.pathname.slice(0, 160),
     }),
   });
 
-  if (!response.ok) throw new Error(`Chat proxy failed: ${response.status}`);
-  const data = (await response.json()) as { answer?: string };
-  if (!data.answer) throw new Error("Chat proxy returned no answer");
-  return data.answer;
+  if (!response.ok) throw new Error(`CHAT_PROXY_${response.status}`);
+  const data = (await response.json()) as { answer?: string; images?: ChatImage[] };
+  if (!data.answer) throw new Error("CHAT_EMPTY_RESPONSE");
+  return { answer: data.answer, images: Array.isArray(data.images) ? data.images.slice(0, 2) : [] };
 }
 
 export function AiConsultantChat() {
@@ -103,31 +103,71 @@ export function AiConsultantChat() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fallbackNotice, setFallbackNotice] = useState("");
+  const [failedQuestion, setFailedQuestion] = useState("");
+  const [historyReady, setHistoryReady] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const messageIdRef = useRef(0);
 
-  function pushMessage(role: ChatRole, text: string) {
+  useEffect(() => {
+    const restore = window.setTimeout(() => {
+      try {
+        const saved = window.localStorage.getItem(CHAT_HISTORY_KEY);
+        const parsed = saved ? (JSON.parse(saved) as ChatMessage[]) : [];
+        if (Array.isArray(parsed) && parsed.length) {
+          messageIdRef.current = parsed.length;
+          setMessages(parsed.slice(-20));
+        }
+      } catch {
+        window.localStorage.removeItem(CHAT_HISTORY_KEY);
+      } finally {
+        setHistoryReady(true);
+      }
+    }, 0);
+    return () => window.clearTimeout(restore);
+  }, []);
+
+  useEffect(() => {
+    if (!historyReady) return;
+    try {
+      window.localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(messages.slice(-20)));
+    } catch {
+      // Chat vẫn hoạt động nếu trình duyệt không cho lưu lịch sử cục bộ.
+    }
+  }, [historyReady, messages]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, loading]);
+
+  function pushMessage(role: ChatRole, text: string, images: ChatImage[] = []) {
     messageIdRef.current += 1;
-    const message = { id: `${role}-${messageIdRef.current}`, role, text };
+    const message: ChatMessage = {
+      id: `${role}-${messageIdRef.current}`,
+      role,
+      text,
+      ...(images.length ? { images } : {}),
+    };
     setMessages((current) => [...current, message]);
-    return message;
   }
 
-  async function sendQuestion(rawQuestion: string) {
+  async function sendQuestion(rawQuestion: string, appendUser = true) {
     const question = rawQuestion.trim();
     if (!question || loading) return;
-
-    const userMessage = pushMessage("user", question);
+    setFallbackNotice("");
+    setFailedQuestion("");
+    if (appendUser) pushMessage("user", question);
     setInput("");
     setLoading(true);
 
-    const nextMessages = [...messages, userMessage];
-
     try {
-      const aiAnswer = await requestAiAnswer(nextMessages, { name: "", phone: "", need: question });
-      pushMessage("assistant", aiAnswer);
+      const result = await requestAiAnswer(question);
+      pushMessage("assistant", result.answer, result.images);
     } catch {
       pushMessage("assistant", buildLocalAnswer(question, { name: "", phone: "", need: question }));
+      setFailedQuestion(question);
+      setFallbackNotice("Kết nối AI đang gián đoạn. Bạn có thể thử lại hoặc tiếp tục bằng thông tin dịch vụ có sẵn.");
     } finally {
       setLoading(false);
       window.setTimeout(() => inputRef.current?.focus(), 50);
@@ -136,7 +176,7 @@ export function AiConsultantChat() {
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    sendQuestion(input);
+    void sendQuestion(input);
   }
 
   return (
@@ -156,20 +196,14 @@ export function AiConsultantChat() {
           >
             <header className="ai-chat-header">
               <div>
-                <span>
-                  <Bot size={17} /> AI tư vấn DST
-                </span>
+                <span><Bot size={17} /> AI tư vấn DST</span>
                 <p>Marketing, Media, Branding</p>
-                <div className="ai-status">
-                  <i aria-hidden="true" /> Trực tuyến
-                </div>
+                <div className="ai-status"><i aria-hidden="true" /> Trực tuyến</div>
               </div>
-              <button onClick={() => setOpen(false)} aria-label="Đóng chat tư vấn">
-                <X size={18} />
-              </button>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Đóng chat tư vấn"><X size={18} /></button>
             </header>
 
-            <div className="ai-chat-messages" aria-live="polite">
+            <div className="ai-chat-messages" aria-live="polite" ref={scrollRef}>
               {messages.map((message) => (
                 <motion.article
                   className={`ai-message ${message.role}`}
@@ -179,59 +213,58 @@ export function AiConsultantChat() {
                   transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <span>{message.role === "assistant" ? <Bot size={15} /> : <User size={15} />}</span>
-                  <p>{message.text}</p>
+                  <div className="ai-message-body">
+                    <p>{message.text}</p>
+                    {message.images?.length ? (
+                      <div className="ai-message-images" aria-label="Ảnh tư vấn phù hợp">
+                        {message.images.map((image) => (
+                          <figure key={image.id}>
+                            <img src={image.url} alt={image.alt} loading="lazy" />
+                            <figcaption>{image.caption}</figcaption>
+                            {image.sourceUrl ? <a href={image.sourceUrl} target="_blank" rel="noreferrer">Xem nguồn ảnh</a> : null}
+                          </figure>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
                 </motion.article>
               ))}
               {loading ? (
                 <article className="ai-message assistant">
-                  <span>
-                    <Bot size={15} />
-                  </span>
-                  <p>
-                    <span className="ai-typing" aria-label="Đang soạn trả lời">
-                      <i />
-                      <i />
-                      <i />
-                    </span>
-                  </p>
+                  <span><Bot size={15} /></span>
+                  <p><span className="ai-typing" aria-label="Đang soạn trả lời"><i /><i /><i /></span></p>
                 </article>
               ) : null}
             </div>
 
+            {fallbackNotice ? (
+              <div className="ai-fallback-notice" role="status">
+                <span>{fallbackNotice}</span>
+                {failedQuestion ? <button type="button" onClick={() => void sendQuestion(failedQuestion, false)}>Thử lại</button> : null}
+              </div>
+            ) : null}
+
             <div className="ai-quick-list" aria-label="Câu hỏi nhanh">
               {quickQuestions.map((question) => (
-                <button key={question} onClick={() => sendQuestion(question)}>
-                  {question}
-                </button>
+                <button type="button" key={question} onClick={() => void sendQuestion(question)}>{question}</button>
               ))}
             </div>
 
             <form className="ai-chat-input" onSubmit={onSubmit}>
-              <input
-                ref={inputRef}
-                value={input}
-                onChange={(event) => setInput(event.target.value)}
-                placeholder="Nhập câu hỏi tư vấn..."
-                aria-label="Nhập câu hỏi tư vấn"
-              />
-              <button type="submit" disabled={!input.trim() || loading} aria-label="Gửi câu hỏi">
-                <Send size={17} />
-              </button>
+              <input ref={inputRef} value={input} onChange={(event) => setInput(event.target.value)} placeholder="Nhập câu hỏi tư vấn..." aria-label="Nhập câu hỏi tư vấn" maxLength={800} />
+              <button type="submit" disabled={!input.trim() || loading} aria-label="Gửi câu hỏi"><Send size={17} /></button>
             </form>
 
             <div className="ai-chat-fallback">
-              <a href={ZALO_URL} target="_blank" rel="noreferrer">
-                Chat Zalo
-              </a>
-              <a href={`tel:${CONTACT_PHONE}`}>
-                <Phone size={15} /> {CONTACT_PHONE}
-              </a>
+              <a href={ZALO_URL} target="_blank" rel="noreferrer">Chat Zalo</a>
+              <a href={`tel:${CONTACT_PHONE}`}><Phone size={15} /> {CONTACT_PHONE}</a>
             </div>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
       <motion.button
+        type="button"
         className="ai-chat-toggle"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
@@ -241,10 +274,7 @@ export function AiConsultantChat() {
         style={{ transformPerspective: 800 }}
       >
         <MessageCircle size={22} />
-        <span>
-          <strong>Tư vấn AI</strong>
-          <small>Phản hồi nhanh</small>
-        </span>
+        <span><strong>Tư vấn AI</strong><small>Phản hồi nhanh</small></span>
         <Zap size={16} />
       </motion.button>
     </section>
