@@ -1,4 +1,4 @@
-import type { ContactInformation, Stat, Testimonial } from "./types";
+import type { ClientPartner, ContactInformation, Stat, Testimonial } from "./types";
 
 // TODO: Cập nhật và xác minh thông tin chính thức của DST Group trước khi công bố.
 // Các giá trị dưới đây được giữ từ website hiện có để không làm mất thông tin đang dùng.
@@ -79,7 +79,27 @@ export const testimonials: Testimonial[] = [
 ];
 
 // TODO: Chỉ thay các tên dưới đây bằng logo/brand name khi có xác nhận sử dụng công khai.
-export const clientNames = ["HALONG BAY", "AURA SPA", "NOVA HOTEL", "LUX FOOD", "OCEAN GROUP", "KAIROS", "MIRA HOME"];
+// TODO: Replace contextual images with confirmed client logos or approved assets before publication.
+// These images are illustrative project material, not client logos.
+export const clientPartners: ClientPartner[] = [
+  { name: "HALONG BAY" },
+  { name: "AURA SPA" },
+  {
+    name: "NOVA HOTEL",
+    image: "assets/10-hotel-lobby-project.jpg",
+    imageAlt: "Không gian sảnh khách sạn trong tư liệu dự án",
+  },
+  {
+    name: "LUX FOOD",
+    image: "assets/13-restaurant-food-project.jpg",
+    imageAlt: "Hình ảnh món ăn trong tư liệu dự án F&B",
+  },
+  { name: "OCEAN GROUP" },
+  { name: "KAIROS" },
+  { name: "MIRA HOME" },
+];
+
+export const clientNames = clientPartners.map((client) => client.name);
 
 // TODO: Add verified public social channels before publishing any additional links.
 export const socialLinks = [

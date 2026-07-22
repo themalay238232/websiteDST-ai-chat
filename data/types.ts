@@ -104,6 +104,12 @@ export interface Testimonial {
   imageAlt?: string;
 }
 
+export interface ClientPartner {
+  name: string;
+  image?: string;
+  imageAlt?: string;
+}
+
 export interface CareerPosition {
   slug: string;
   title: string;

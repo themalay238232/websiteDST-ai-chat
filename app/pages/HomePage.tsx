@@ -1,5 +1,5 @@
 import { ArrowRight, ClipboardCheck, Lightbulb, ShieldCheck, Star, Users } from "lucide-react";
-import { clientNames, companyStats, testimonials } from "../../data/company";
+import { clientPartners, companyStats, testimonials } from "../../data/company";
 import { processSteps } from "../../data/home";
 import { projects } from "../../data/projects";
 import { services } from "../../data/services";
@@ -20,6 +20,8 @@ const reasons = [
   { icon: ShieldCheck, title: "Đồng bộ điểm chạm", text: "Marketing, nội dung, media và thương hiệu có thể cùng bám một định hướng." },
   { icon: Users, title: "Phối hợp sát dự án", text: "Tập trung vào trao đổi thực tế để hỗ trợ đội ngũ triển khai hiệu quả hơn." },
 ];
+
+const capabilities = ["Marketing Strategy", "Creative Content", "Media Production", "TikTok Shop", "Branding", "Website Experience"];
 
 export function HomePage({ onNavigate, onOpenChat }: PageProps) {
   return (
@@ -46,7 +48,18 @@ export function HomePage({ onNavigate, onOpenChat }: PageProps) {
         </div>
       </section>
 
-      <section className="capability-strip" aria-label="Năng lực nổi bật"><div><span>Marketing Strategy</span><span>Creative Content</span><span>Media Production</span><span>TikTok Shop</span><span>Branding</span><span>Website Experience</span></div></section>
+      <section className="capability-strip" aria-label="Năng lực nổi bật">
+        <div className="capability-marquee">
+          <div className="capability-track">
+            <div className="capability-group">
+              {capabilities.map((capability) => <span key={capability}>{capability}</span>)}
+            </div>
+            <div className="capability-group" aria-hidden="true">
+              {capabilities.map((capability) => <span key={`duplicate-${capability}`}>{capability}</span>)}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="section page-width intro-split">
         <Reveal className="intro-media">
@@ -95,7 +108,19 @@ export function HomePage({ onNavigate, onOpenChat }: PageProps) {
         <div className="testimonial-grid">{testimonials.map((item) => <Reveal key={item.name}><article className="testimonial-card">{item.image ? <img src={assetPath(item.image)} alt={item.imageAlt || item.name} loading="lazy" decoding="async" /> : null}<div><span className="rating" aria-label="5 sao"><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /><Star size={15} fill="currentColor" /></span><blockquote>“{item.quote}”</blockquote><strong>{item.name}</strong><p>{item.role}</p></div></article></Reveal>)}</div>
       </section>
 
-      <section className="client-section"><div className="page-width"><p className="eyebrow">Đối tác & khách hàng</p><div className="client-list">{clientNames.map((name) => <span key={name}>{name}</span>)}</div></div></section>
+      <section className="client-section">
+        <div className="page-width">
+          <p className="eyebrow">Đối tác & khách hàng</p>
+          <div className="client-list">
+            {clientPartners.map((client) => (
+              <article className={`client-partner${client.image ? " has-image" : ""}`} key={client.name}>
+                {client.image ? <img src={assetPath(client.image)} alt={client.imageAlt || `Hình ảnh minh họa cho ${client.name}`} loading="lazy" decoding="async" /> : null}
+                <span>{client.name}</span>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
       <CTASection onNavigate={onNavigate} onOpenChat={onOpenChat} />
     </>
   );
