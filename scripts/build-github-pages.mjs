@@ -51,6 +51,7 @@ const fallback = `<!doctype html><html lang="vi"><head><meta charset="utf-8"><me
 await writeFile(path.join(outputDir, "404.html"), fallback, "utf8");
 
 const sitemapUrls = Object.keys(routeMeta)
+  .filter((route) => route !== "/hop-thu")
   .map((route) => `<url><loc>${routeUrl(route)}</loc></url>`)
   .join("");
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapUrls}</urlset>`;

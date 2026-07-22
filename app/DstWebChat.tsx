@@ -2,7 +2,6 @@
 
 import {
   Bot,
-  ExternalLink,
   LogOut,
   MessageCircle,
   Minimize2,
@@ -11,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { BrandLogo } from "./components/BrandLogo";
 import {
   clearWebSession,
   createGuestSession,
@@ -29,7 +29,6 @@ type ChatMessage = {
   images?: WebChatImage[];
 };
 
-const MESSENGER_URL = "https://m.me/61592072642755";
 const WELCOME =
   "Xin chào, tôi là trợ lý tư vấn DST Group. Anh/chị cần hỗ trợ dịch vụ nào ạ?";
 const QUICK_QUESTIONS = [
@@ -188,9 +187,12 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
           aria-label="Chat tư vấn DST Group"
         >
           <header className="web-chat-header">
-            <div>
-              <strong><MessageCircle size={18} aria-hidden="true" /> DST Group</strong>
-              <small>Trợ lý AI tư vấn trực tuyến</small>
+            <div className="web-chat-brand">
+              <span className="web-chat-brand-logo"><BrandLogo /></span>
+              <span>
+                <strong>DST Group</strong>
+                <small><i /> Đang hoạt động</small>
+              </span>
             </div>
             <div className="web-chat-actions">
               <button type="button" onClick={() => onOpenChange(false)} aria-label="Thu nhỏ chat">
@@ -211,11 +213,8 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
               </p>
               <button type="button" onClick={() => void startChat()} disabled={sessionBusy}>
                 <MessageCircle size={18} aria-hidden="true" />
-                {sessionBusy ? "Đang kết nối..." : "Bắt đầu tư vấn"}
+                {sessionBusy ? "Đang kết nối..." : "Bắt đầu chat ngay"}
               </button>
-              <a className="web-chat-login-messenger" href={MESSENGER_URL} target="_blank" rel="noreferrer">
-                Mở Messenger <ExternalLink size={15} aria-hidden="true" />
-              </a>
               {error ? <p className="web-chat-error" role="alert">{error}</p> : null}
             </div>
           ) : (
@@ -235,34 +234,36 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
               <div className="web-chat-messages" ref={scrollRef} aria-live="polite">
                 {messages.map((message) => (
                   <article className={`web-chat-message ${message.role}`} key={message.id}>
-                    <p>{message.text}</p>
-                    {message.images?.length ? (
-                      <div className="web-chat-images" aria-label="Ảnh tư vấn phù hợp">
-                        {message.images.map((image) => (
-                          <figure key={image.id}>
-                            <img src={image.url} alt={image.alt} loading="lazy" />
-                            <figcaption>{image.caption}</figcaption>
-                            {image.sourceUrl && safeHttpsUrl(image.sourceUrl) ? (
-                              <a href={image.sourceUrl} target="_blank" rel="noreferrer">
-                                Xem nguồn ảnh
-                              </a>
-                            ) : null}
-                          </figure>
-                        ))}
-                      </div>
+                    {message.role === "assistant" ? (
+                      <span className="web-chat-message-avatar"><BrandLogo /></span>
                     ) : null}
+                    <div>
+                      <p>{message.text}</p>
+                      {message.images?.length ? (
+                        <div className="web-chat-images" aria-label="Ảnh tư vấn phù hợp">
+                          {message.images.map((image) => (
+                            <figure key={image.id}>
+                              <img src={image.url} alt={image.alt} loading="lazy" />
+                              <figcaption>{image.caption}</figcaption>
+                              {image.sourceUrl && safeHttpsUrl(image.sourceUrl) ? (
+                                <a href={image.sourceUrl} target="_blank" rel="noreferrer">
+                                  Xem nguồn ảnh
+                                </a>
+                              ) : null}
+                            </figure>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
                   </article>
                 ))}
                 {sendBusy ? (
-                  <p className="web-chat-typing" role="status">DST đang soạn câu trả lời…</p>
+                  <div className="web-chat-typing" role="status" aria-label="DST đang trả lời">
+                    <span /><span /><span />
+                  </div>
                 ) : null}
               </div>
               {error ? <p className="web-chat-error" role="alert">{error}</p> : null}
-              <a className="web-chat-messenger-link" href={MESSENGER_URL} target="_blank" rel="noreferrer">
-                <MessageCircle size={15} aria-hidden="true" />
-                Tiếp tục trên Messenger
-                <ExternalLink size={14} aria-hidden="true" />
-              </a>
               <div className="web-chat-quick" aria-label="Câu hỏi nhanh">
                 {QUICK_QUESTIONS.map((question) => (
                   <button
@@ -304,8 +305,8 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
       >
         <MessageCircle size={22} aria-hidden="true" />
         <span>
-          <strong>Chat tư vấn AI</strong>
-          <small>Không cần đăng nhập</small>
+          <strong>Chat với DST Group</strong>
+          <small>Trả lời ngay trên website</small>
         </span>
       </button>
     </section>

@@ -64,5 +64,6 @@
     "description": "Liên hệ DST Group qua form tư vấn, điện thoại, email hoặc Zalo."
   },
   "/chinh-sach-bao-mat": { "title": "Chính sách bảo mật | DST Group", "description": "Thông tin về nguyên tắc xử lý dữ liệu liên hệ trên website DST Group." },
-  "/dieu-khoan-su-dung": { "title": "Điều khoản sử dụng | DST Group", "description": "Điều khoản sử dụng nội dung và biểu mẫu trên website DST Group." }
+  "/dieu-khoan-su-dung": { "title": "Điều khoản sử dụng | DST Group", "description": "Điều khoản sử dụng nội dung và biểu mẫu trên website DST Group." },
+  "/hop-thu": { "title": "Hộp thư hợp nhất | DST Group", "description": "Khu vực quản trị cuộc trò chuyện website và Messenger dành cho DST Group." }
 }

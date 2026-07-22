@@ -15,6 +15,7 @@ import { ArticlePage } from "./pages/ArticlePage";
 import { CareersPage } from "./pages/CareersPage";
 import { ContactPage } from "./pages/ContactPage";
 import { HomePage } from "./pages/HomePage";
+import { InboxPage } from "./pages/InboxPage";
 import { LegalPage } from "./pages/LegalPage";
 import { NewsPage } from "./pages/NewsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -107,6 +108,10 @@ export function WebsiteApp({ initialPath }: WebsiteAppProps) {
     if (currentPath === "/chinh-sach-bao-mat") return <LegalPage type="privacy" />;
     if (currentPath === "/dieu-khoan-su-dung") return <LegalPage type="terms" />;
     return <NotFoundPage onNavigate={navigate} />;
+  }
+
+  if (currentPath === "/hop-thu") {
+    return <InboxPage onExit={() => navigate("/")} />;
   }
 
   return (

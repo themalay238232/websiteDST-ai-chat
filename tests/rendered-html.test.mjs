@@ -70,19 +70,19 @@ test("creates protected guest sessions for website chat", async () => {
   );
 });
 
-test("renders public DST web chat with Messenger handoff", async () => {
+test("renders a public Messenger-style DST web chat without redirecting customers", async () => {
   const [chatSource, appSource, floatingSource] = await Promise.all([
     readFile(new URL("../app/DstWebChat.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/WebsiteApp.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/FloatingContactButtons.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(chatSource, /Bắt đầu tư vấn/);
+  assert.match(chatSource, /Bắt đầu chat ngay/);
   assert.match(chatSource, /createGuestSession/);
   assert.match(chatSource, /sendWebChat/);
   assert.match(chatSource, /message\.images/);
-  assert.match(chatSource, /Tiếp tục trên Messenger/);
-  assert.match(chatSource, /m\.me\/61592072642755/);
+  assert.match(chatSource, /Đang hoạt động/);
+  assert.doesNotMatch(chatSource, /m\.me\/|Mở Messenger|Tiếp tục trên Messenger/);
   assert.match(appSource, /DstWebChat/);
   assert.doesNotMatch(appSource, /FacebookMessengerChat/);
   assert.doesNotMatch(appSource, /AiConsultantChat/);
@@ -93,4 +93,22 @@ test("renders public DST web chat with Messenger handoff", async () => {
     `${chatSource}\n${appSource}\n${floatingSource}`,
     /PAGE_ACCESS_TOKEN|APP_SECRET|GEMINI_API_KEY|c_user|xs=/,
   );
+});
+
+test("adds a protected unified inbox for website and real Messenger conversations", async () => {
+  const [pageSource, apiSource, appSource] = await Promise.all([
+    readFile(new URL("../app/pages/InboxPage.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/dst-inbox.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/WebsiteApp.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(pageSource, /Hộp thư DST/);
+  assert.match(pageSource, /Cuộc trò chuyện Messenger thật/);
+  assert.match(pageSource, /replyToMessenger/);
+  assert.match(apiSource, /\/api\/admin\/inbox/);
+  assert.match(apiSource, /\/api\/admin\/conversation/);
+  assert.match(apiSource, /\/api\/admin\/reply/);
+  assert.match(apiSource, /sessionStorage/);
+  assert.match(appSource, /\/hop-thu/);
+  assert.doesNotMatch(`${pageSource}\n${apiSource}`, /PAGE_ACCESS_TOKEN|META_APP_SECRET|ADMIN_INBOX_TOKEN/);
 });
