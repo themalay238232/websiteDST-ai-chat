@@ -41,7 +41,11 @@ export function HomePage({ onNavigate, onOpenChat }: PageProps) {
           <Reveal className="hero-brand-stage">
             <span className="brand-line brand-line-one" aria-hidden="true" />
             <span className="brand-line brand-line-two" aria-hidden="true" />
-            <div className="hero-brand-logo"><BrandLogo variant="media" priority /></div>
+            <span className="brand-orbit brand-orbit-one" aria-hidden="true" />
+            <span className="brand-orbit brand-orbit-two" aria-hidden="true" />
+            <div className="hero-brand-card-motion">
+              <div className="hero-brand-logo"><BrandLogo variant="media" priority /></div>
+            </div>
             <span className="brand-tag tag-top">ADS</span>
             <span className="brand-tag tag-bottom">BRANDING</span>
           </Reveal>
@@ -112,12 +116,18 @@ export function HomePage({ onNavigate, onOpenChat }: PageProps) {
         <div className="page-width">
           <p className="eyebrow">Đối tác & khách hàng</p>
           <div className="client-list">
-            {clientPartners.map((client) => (
-              <article className={`client-partner${client.image ? " has-image" : ""}`} key={client.name}>
-                {client.image ? <img src={assetPath(client.image)} alt={client.imageAlt || `Hình ảnh minh họa cho ${client.name}`} loading="lazy" decoding="async" /> : null}
-                <span>{client.name}</span>
-              </article>
-            ))}
+            {clientPartners.map((client) => {
+              const className = `client-partner${client.image ? " has-image" : ""}`;
+              const content = <>{client.image ? <img src={assetPath(client.image)} alt={client.imageAlt || `Hình ảnh minh họa cho ${client.name}`} loading="lazy" decoding="async" /> : null}<span>{client.name}</span></>;
+
+              return client.url ? (
+                <a className={className} href={client.url} key={client.name} target="_blank" rel="noreferrer" aria-label={`Mở fanpage của ${client.name}`}>
+                  {content}
+                </a>
+              ) : (
+                <article className={className} key={client.name}>{content}</article>
+              );
+            })}
           </div>
         </div>
       </section>

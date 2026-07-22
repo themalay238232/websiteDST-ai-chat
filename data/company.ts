@@ -82,21 +82,47 @@ export const testimonials: Testimonial[] = [
 // TODO: Replace contextual images with confirmed client logos or approved assets before publication.
 // These images are illustrative project material, not client logos.
 export const clientPartners: ClientPartner[] = [
-  { name: "HALONG BAY" },
-  { name: "AURA SPA" },
+  {
+    name: "HALONG BAY",
+    image: "assets/partner-halong-bay.jpg",
+    imageAlt: "Cảnh vịnh Hạ Long dùng làm hình minh họa",
+    url: "https://www.facebook.com/bookhalongbaycruisestours",
+  },
+  {
+    name: "AURA SPA",
+    image: "assets/partner-aura-spa.jpg",
+    imageAlt: "Không gian spa dùng làm hình minh họa",
+    url: "https://www.facebook.com/profile.php?id=61557489880730",
+  },
   {
     name: "NOVA HOTEL",
     image: "assets/10-hotel-lobby-project.jpg",
     imageAlt: "Không gian sảnh khách sạn trong tư liệu dự án",
+    url: "https://www.facebook.com/NovaHotel.DN",
   },
   {
     name: "LUX FOOD",
     image: "assets/13-restaurant-food-project.jpg",
     imageAlt: "Hình ảnh món ăn trong tư liệu dự án F&B",
+    url: "https://www.facebook.com/UAB.DSP.Baltic",
   },
-  { name: "OCEAN GROUP" },
-  { name: "KAIROS" },
-  { name: "MIRA HOME" },
+  {
+    name: "OCEAN GROUP",
+    image: "assets/partner-ocean-group.jpg",
+    imageAlt: "Góc nhìn đại dương từ trên cao dùng làm hình minh họa",
+    url: "https://www.facebook.com/Adv.Ocean",
+  },
+  {
+    name: "KAIROS",
+    image: "assets/partner-kairos.jpg",
+    imageAlt: "Đội ngũ sáng tạo làm việc dùng làm hình minh họa",
+    url: "https://www.facebook.com/kairos.couturee",
+  },
+  {
+    name: "MIRA HOME",
+    image: "assets/partner-mira-home.jpg",
+    imageAlt: "Không gian nội thất hiện đại dùng làm hình minh họa",
+  },
 ];
 
 export const clientNames = clientPartners.map((client) => client.name);

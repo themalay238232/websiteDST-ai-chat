@@ -108,6 +108,7 @@ export interface ClientPartner {
   name: string;
   image?: string;
   imageAlt?: string;
+  url?: string;
 }
 
 export interface CareerPosition {
