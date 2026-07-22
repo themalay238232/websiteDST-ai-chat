@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { findArticle } from "../data/articles";
 import { findProject } from "../data/projects";
 import { findService } from "../data/services";
-import { FacebookMessengerChat } from "./FacebookMessengerChat";
+import { FacebookWebChat } from "./FacebookWebChat";
 import { FloatingContactButtons } from "./components/FloatingContactButtons";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
@@ -54,7 +54,7 @@ function routeSchema(path: string) {
 
 export function WebsiteApp({ initialPath }: WebsiteAppProps) {
   const [currentPath, setCurrentPath] = useState(() => normalizeRoutePath(initialPath || routeFromBrowser()));
-  const [chatToken, setChatToken] = useState(0);
+  const [chatOpen, setChatOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const schema = useMemo(() => routeSchema(currentPath), [currentPath]);
   usePageMetadata(currentPath, schema);
@@ -81,7 +81,7 @@ export function WebsiteApp({ initialPath }: WebsiteAppProps) {
   }
 
   function openChat() {
-    setChatToken((value) => value + 1);
+    setChatOpen(true);
   }
 
   function renderRoute() {
@@ -116,7 +116,7 @@ export function WebsiteApp({ initialPath }: WebsiteAppProps) {
       <main id="main-content" ref={mainRef} tabIndex={-1}>{renderRoute()}</main>
       <Footer onNavigate={navigate} />
       <FloatingContactButtons onOpenChat={openChat} />
-      <FacebookMessengerChat openToken={chatToken} />
+      <FacebookWebChat open={chatOpen} onOpenChange={setChatOpen} />
     </div>
   );
 }

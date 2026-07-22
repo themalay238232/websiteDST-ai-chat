@@ -75,24 +75,25 @@ test("uses Facebook Login only to create a protected DST web chat session", asyn
   );
 });
 
-test("embeds the real DST Facebook Messenger interface safely", async () => {
-  const [messengerSource, appSource, floatingSource] = await Promise.all([
-    readFile(new URL("../app/FacebookMessengerChat.tsx", import.meta.url), "utf8"),
+test("renders the authenticated DST web chat without a Facebook iframe", async () => {
+  const [chatSource, appSource, floatingSource] = await Promise.all([
+    readFile(new URL("../app/FacebookWebChat.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/WebsiteApp.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/FloatingContactButtons.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(messengerSource, /facebook\.com\/plugins\/page\.php/);
-  assert.match(messengerSource, /tabs.*messages/);
-  assert.match(messengerSource, /61592072642755/);
-  assert.match(messengerSource, /m\.me\/61592072642755/);
-  assert.match(messengerSource, /loading="lazy"/);
-  assert.match(messengerSource, /hasOpened/);
-  assert.match(appSource, /FacebookMessengerChat/);
+  assert.match(chatSource, /Đăng nhập bằng Facebook/);
+  assert.match(chatSource, /loginWithFacebook/);
+  assert.match(chatSource, /sendWebChat/);
+  assert.match(chatSource, /message\.images/);
+  assert.match(chatSource, /Đăng xuất khỏi chat/);
+  assert.match(appSource, /FacebookWebChat/);
+  assert.doesNotMatch(appSource, /FacebookMessengerChat/);
   assert.doesNotMatch(appSource, /AiConsultantChat/);
-  assert.match(floatingSource, /Messenger/);
+  assert.match(floatingSource, /tư vấn AI/iu);
+  assert.doesNotMatch(chatSource, /facebook\.com\/plugins\/page\.php|<iframe/);
   assert.doesNotMatch(
-    `${messengerSource}\n${appSource}\n${floatingSource}`,
+    `${chatSource}\n${appSource}\n${floatingSource}`,
     /PAGE_ACCESS_TOKEN|APP_SECRET|GEMINI_API_KEY|c_user|xs=/,
   );
 });
