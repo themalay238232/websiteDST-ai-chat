@@ -56,6 +56,25 @@ test("keeps GitHub Pages base paths, fallback routing, SEO files, and no fronten
   assert.doesNotMatch(staticIndex, /api[_-]?key\s*[:=]\s*["'][^"']+/i);
 });
 
+test("uses Facebook Login only to create a protected DST web chat session", async () => {
+  const [sdkSource, apiSource] = await Promise.all([
+    readFile(new URL("../app/lib/facebook-sdk.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/dst-web-chat.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(sdkSource, /connect\.facebook\.net\/vi_VN\/sdk\.js/);
+  assert.match(sdkSource, /FB\.login/);
+  assert.match(sdkSource, /public_profile/);
+  assert.match(apiSource, /\/api\/web-auth/);
+  assert.match(apiSource, /\/api\/web-chat/);
+  assert.match(apiSource, /Authorization.*Bearer/is);
+  assert.match(apiSource, /sessionStorage/);
+  assert.doesNotMatch(apiSource, /localStorage/);
+  assert.doesNotMatch(
+    `${sdkSource}\n${apiSource}`,
+    /META_APP_SECRET|PAGE_ACCESS_TOKEN|GEMINI_API_KEY|WEB_SESSION_SECRET|c_user|xs=/,
+  );
+});
+
 test("embeds the real DST Facebook Messenger interface safely", async () => {
   const [messengerSource, appSource, floatingSource] = await Promise.all([
     readFile(new URL("../app/FacebookMessengerChat.tsx", import.meta.url), "utf8"),
