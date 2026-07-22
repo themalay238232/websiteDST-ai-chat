@@ -2,7 +2,7 @@
 
 import {
   Bot,
-  LogIn,
+  ExternalLink,
   LogOut,
   MessageCircle,
   Minimize2,
@@ -11,10 +11,9 @@ import {
   X,
 } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { loadFacebookSdk, loginWithFacebook } from "./lib/facebook-sdk";
 import {
   clearWebSession,
-  exchangeFacebookToken,
+  createGuestSession,
   loadWebSession,
   saveWebSession,
   sendWebChat,
@@ -30,6 +29,7 @@ type ChatMessage = {
   images?: WebChatImage[];
 };
 
+const MESSENGER_URL = "https://m.me/61592072642755";
 const WELCOME =
   "Xin chào, tôi là trợ lý tư vấn DST Group. Anh/chị cần hỗ trợ dịch vụ nào ạ?";
 const QUICK_QUESTIONS = [
@@ -50,16 +50,16 @@ function welcomeMessage(): ChatMessage {
   return { id: 0, role: "assistant", text: WELCOME };
 }
 
-type FacebookWebChatProps = {
+type DstWebChatProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
+export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
   const [session, setSession] = useState<WebSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [authBusy, setAuthBusy] = useState(false);
+  const [sessionBusy, setSessionBusy] = useState(false);
   const [sendBusy, setSendBusy] = useState(false);
   const [error, setError] = useState("");
   const nextId = useRef(0);
@@ -73,10 +73,6 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
     }, 0);
     return () => window.clearTimeout(restoreTimer);
   }, []);
-
-  useEffect(() => {
-    if (open && !session) void loadFacebookSdk().catch(() => undefined);
-  }, [open, session]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -108,13 +104,12 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
     }]);
   }
 
-  async function signIn() {
-    if (authBusy) return;
-    setAuthBusy(true);
+  async function startChat() {
+    if (sessionBusy) return;
+    setSessionBusy(true);
     setError("");
     try {
-      const facebookAccessToken = await loginWithFacebook();
-      const nextSession = await exchangeFacebookToken(facebookAccessToken);
+      const nextSession = await createGuestSession();
       try {
         saveWebSession(nextSession);
       } catch {
@@ -123,16 +118,18 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
       nextId.current = 0;
       setSession(nextSession);
       setMessages([welcomeMessage()]);
-    } catch {
+    } catch (requestError) {
       setError(
-        "Không thể đăng nhập Facebook. Anh/chị hãy cho phép popup rồi thử lại.",
+        requestError instanceof WebChatError && requestError.status === 429
+          ? "Anh/chị đang kết nối quá nhanh. Vui lòng chờ một phút rồi thử lại."
+          : "Chưa thể kết nối trợ lý DST. Anh/chị vui lòng thử lại.",
       );
     } finally {
-      setAuthBusy(false);
+      setSessionBusy(false);
     }
   }
 
-  function signOut() {
+  function endChat() {
     try {
       clearWebSession();
     } catch {
@@ -164,8 +161,8 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
       );
     } catch (requestError) {
       if (requestError instanceof WebChatError && requestError.status === 401) {
-        signOut();
-        setError("Phiên đăng nhập đã hết hạn. Anh/chị vui lòng đăng nhập lại.");
+        endChat();
+        setError("Phiên tư vấn đã hết hạn. Anh/chị vui lòng kết nối lại.");
       } else if (requestError instanceof WebChatError && requestError.status === 429) {
         setError("Anh/chị đang gửi quá nhanh. Vui lòng chờ một phút rồi thử lại.");
       } else {
@@ -210,12 +207,15 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
               <Bot size={42} aria-hidden="true" />
               <h2>Tư vấn cùng DST Group</h2>
               <p>
-                Đăng nhập Facebook để bắt đầu cuộc trò chuyện bảo mật ngay trên website.
+                Chat trực tiếp trên website, không cần tài khoản. Trợ lý sử dụng cùng dữ liệu tư vấn với bot Messenger của DST.
               </p>
-              <button type="button" onClick={() => void signIn()} disabled={authBusy}>
-                <LogIn size={18} aria-hidden="true" />
-                {authBusy ? "Đang đăng nhập..." : "Đăng nhập bằng Facebook"}
+              <button type="button" onClick={() => void startChat()} disabled={sessionBusy}>
+                <MessageCircle size={18} aria-hidden="true" />
+                {sessionBusy ? "Đang kết nối..." : "Bắt đầu tư vấn"}
               </button>
+              <a className="web-chat-login-messenger" href={MESSENGER_URL} target="_blank" rel="noreferrer">
+                Mở Messenger <ExternalLink size={15} aria-hidden="true" />
+              </a>
               {error ? <p className="web-chat-error" role="alert">{error}</p> : null}
             </div>
           ) : (
@@ -228,8 +228,8 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
                   <small>Đang tư vấn với</small>
                   <strong>{session.profile.name}</strong>
                 </span>
-                <button type="button" onClick={signOut} title="Đăng xuất khỏi chat">
-                  <LogOut size={17} aria-hidden="true" /> Đăng xuất khỏi chat
+                <button type="button" onClick={endChat} title="Kết thúc phiên chat">
+                  <LogOut size={17} aria-hidden="true" /> Kết thúc
                 </button>
               </div>
               <div className="web-chat-messages" ref={scrollRef} aria-live="polite">
@@ -258,6 +258,11 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
                 ) : null}
               </div>
               {error ? <p className="web-chat-error" role="alert">{error}</p> : null}
+              <a className="web-chat-messenger-link" href={MESSENGER_URL} target="_blank" rel="noreferrer">
+                <MessageCircle size={15} aria-hidden="true" />
+                Tiếp tục trên Messenger
+                <ExternalLink size={14} aria-hidden="true" />
+              </a>
               <div className="web-chat-quick" aria-label="Câu hỏi nhanh">
                 {QUICK_QUESTIONS.map((question) => (
                   <button
@@ -300,7 +305,7 @@ export function FacebookWebChat({ open, onOpenChange }: FacebookWebChatProps) {
         <MessageCircle size={22} aria-hidden="true" />
         <span>
           <strong>Chat tư vấn AI</strong>
-          <small>Đăng nhập bằng Facebook</small>
+          <small>Không cần đăng nhập</small>
         </span>
       </button>
     </section>

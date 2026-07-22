@@ -1,7 +1,7 @@
 const WORKER_URL = "https://dst-group-messenger-ai.longv7393.workers.dev";
-const SESSION_KEY = "dst-facebook-web-session-v1";
+const SESSION_KEY = "dst-guest-web-session-v2";
 
-export type FacebookProfile = {
+export type WebChatProfile = {
   name: string;
   picture: string;
 };
@@ -9,7 +9,7 @@ export type FacebookProfile = {
 export type WebSession = {
   sessionToken: string;
   expiresAt: number;
-  profile: FacebookProfile;
+  profile: WebChatProfile;
 };
 
 export type WebChatImage = {
@@ -42,11 +42,10 @@ async function readJson<T>(response: Response): Promise<T> {
   return body as T;
 }
 
-export async function exchangeFacebookToken(accessToken: string): Promise<WebSession> {
-  const response = await fetch(`${WORKER_URL}/api/web-auth`, {
+export async function createGuestSession(): Promise<WebSession> {
+  const response = await fetch(`${WORKER_URL}/api/guest-session`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ accessToken }),
   });
   const session = await readJson<Partial<WebSession>>(response);
   if (
@@ -54,7 +53,7 @@ export async function exchangeFacebookToken(accessToken: string): Promise<WebSes
     || typeof session.expiresAt !== "number"
     || !session.profile?.name
   ) {
-    throw new WebChatError(502, "INVALID_AUTH_RESPONSE");
+    throw new WebChatError(502, "INVALID_SESSION_RESPONSE");
   }
   return session as WebSession;
 }

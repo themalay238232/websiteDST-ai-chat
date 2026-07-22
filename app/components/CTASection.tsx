@@ -23,7 +23,7 @@ export function CTASection({
         <p>{description}</p>
         <div className="hero-actions">
           <AppLink className="primary-btn" to="/lien-he" onNavigate={onNavigate}>Nhận tư vấn <ArrowRight size={17} aria-hidden="true" /></AppLink>
-          {onOpenChat ? <button className="ghost-btn" type="button" onClick={onOpenChat}><MessageCircle size={17} aria-hidden="true" />Chat Messenger</button> : null}
+          {onOpenChat ? <button className="ghost-btn" type="button" onClick={onOpenChat}><MessageCircle size={17} aria-hidden="true" />Chat tư vấn</button> : null}
         </div>
       </div>
       <div className="cta-logo-panel" aria-hidden="true"><BrandLogo variant="media" /></div>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { findArticle } from "../data/articles";
 import { findProject } from "../data/projects";
 import { findService } from "../data/services";
-import { FacebookWebChat } from "./FacebookWebChat";
+import { DstWebChat } from "./DstWebChat";
 import { FloatingContactButtons } from "./components/FloatingContactButtons";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
@@ -116,7 +116,7 @@ export function WebsiteApp({ initialPath }: WebsiteAppProps) {
       <main id="main-content" ref={mainRef} tabIndex={-1}>{renderRoute()}</main>
       <Footer onNavigate={navigate} />
       <FloatingContactButtons onOpenChat={openChat} />
-      <FacebookWebChat open={chatOpen} onOpenChange={setChatOpen} />
+      <DstWebChat open={chatOpen} onOpenChange={setChatOpen} />
     </div>
   );
 }
