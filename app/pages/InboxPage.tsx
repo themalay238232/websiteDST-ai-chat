@@ -59,7 +59,7 @@ export function InboxPage({ onExit }: InboxPageProps) {
   const [replying, setReplying] = useState(false);
   const [error, setError] = useState("");
   const [messengerConnected, setMessengerConnected] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const threadScrollRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<InboxSummary | null>(null);
 
   const openConversation = useCallback(async (item: InboxSummary, adminToken: string) => {
@@ -129,7 +129,10 @@ export function InboxPage({ onExit }: InboxPageProps) {
   }, [refreshInbox, token]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    threadScrollRef.current?.scrollTo({
+      top: threadScrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [thread, threadLoading]);
 
   useEffect(() => {
@@ -303,7 +306,7 @@ export function InboxPage({ onExit }: InboxPageProps) {
                 {selected.channel === "messenger" ? "Messenger" : "Website"}
               </span>
             </header>
-            <div className="inbox-thread-messages">
+            <div className="inbox-thread-messages" ref={threadScrollRef}>
               {threadLoading ? (
                 <div className="inbox-thread-loading"><LoaderCircle className="is-spinning" /> Đang tải cuộc trò chuyện</div>
               ) : thread?.messages?.length ? thread.messages.map((message) => (
@@ -320,7 +323,6 @@ export function InboxPage({ onExit }: InboxPageProps) {
               )) : (
                 <div className="inbox-thread-empty"><Bot size={38} /><p>Chưa có nội dung để hiển thị.</p></div>
               )}
-              <div ref={bottomRef} />
             </div>
             {error ? <p className="inbox-thread-error" role="alert">{error}</p> : null}
             {selected.channel === "messenger" ? (
