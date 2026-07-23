@@ -109,6 +109,20 @@ test("renders a public Messenger-style DST web chat without redirecting customer
   );
 });
 
+test("leads the DST homepage with real project proof and a branded web-chat surface", async () => {
+  const [homeSource, chatSource, headerSource] = await Promise.all([
+    readFile(new URL("../app/pages/HomePage.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/DstWebChat.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/Header.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(homeSource, /hero-project-sheet/);
+  assert.match(homeSource, /Dự án nổi bật/);
+  assert.match(homeSource, /Chat tư vấn/);
+  assert.match(chatSource, /Trợ lý tư vấn trực tuyến/);
+  assert.match(headerSource, /Marketing · Media · Branding/);
+});
+
 test("adds a protected unified inbox for website and real Messenger conversations", async () => {
   const [pageSource, apiSource, appSource] = await Promise.all([
     readFile(new URL("../app/pages/InboxPage.tsx", import.meta.url), "utf8"),
