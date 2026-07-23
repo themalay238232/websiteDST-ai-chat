@@ -61,9 +61,10 @@ test("creates protected guest sessions for website chat", async () => {
 
   assert.match(apiSource, /\/api\/guest-session/);
   assert.match(apiSource, /\/api\/web-chat/);
+  assert.match(apiSource, /\/api\/web-history/);
   assert.match(apiSource, /Authorization.*Bearer/is);
-  assert.match(apiSource, /sessionStorage/);
-  assert.doesNotMatch(apiSource, /localStorage/);
+  assert.match(apiSource, /localStorage/);
+  assert.doesNotMatch(apiSource, /sessionStorage/);
   assert.doesNotMatch(
     apiSource,
     /META_APP_SECRET|PAGE_ACCESS_TOKEN|GEMINI_API_KEY|WEB_SESSION_SECRET|c_user|xs=/,
@@ -71,8 +72,10 @@ test("creates protected guest sessions for website chat", async () => {
 });
 
 test("renders a public Messenger-style DST web chat without redirecting customers", async () => {
-  const [chatSource, appSource, floatingSource] = await Promise.all([
+  const [chatSource, apiSource, imageSource, appSource, floatingSource] = await Promise.all([
     readFile(new URL("../app/DstWebChat.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/dst-web-chat.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/dst-image-upload.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/WebsiteApp.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/components/FloatingContactButtons.tsx", import.meta.url), "utf8"),
   ]);
@@ -80,7 +83,18 @@ test("renders a public Messenger-style DST web chat without redirecting customer
   assert.match(chatSource, /Bắt đầu chat ngay/);
   assert.match(chatSource, /createGuestSession/);
   assert.match(chatSource, /sendWebChat/);
+  assert.match(chatSource, /loadWebHistory/);
+  assert.match(chatSource, /Xóa cuộc trò chuyện/);
+  assert.match(chatSource, /30 ngày/);
   assert.match(chatSource, /message\.images/);
+  assert.match(chatSource, /\.jpg,\.jpeg,\.png,\.webp,image\/jpeg,image\/png,image\/webp/);
+  assert.match(chatSource, /Chọn ảnh gửi cho trợ lý/);
+  assert.match(chatSource, /Xóa ảnh đã chọn/);
+  assert.match(apiSource, /\/api\/web-upload/);
+  assert.match(apiSource, /uploadWebImage/);
+  assert.match(imageSource, /1_600/);
+  assert.match(imageSource, /2 \* 1024 \* 1024/);
+  assert.match(imageSource, /canvas/);
   assert.match(chatSource, /Đang hoạt động/);
   assert.doesNotMatch(chatSource, /m\.me\/|Mở Messenger|Tiếp tục trên Messenger/);
   assert.match(appSource, /DstWebChat/);

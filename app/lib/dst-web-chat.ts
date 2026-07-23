@@ -1,5 +1,5 @@
 const WORKER_URL = "https://dst-group-messenger-ai.longv7393.workers.dev";
-const SESSION_KEY = "dst-guest-web-session-v2";
+const SESSION_KEY = "dst-guest-web-session-v3";
 
 export type WebChatProfile = {
   name: string;
@@ -13,16 +13,29 @@ export type WebSession = {
 };
 
 export type WebChatImage = {
-  id: string;
+  id?: string;
   url: string;
   alt: string;
-  caption: string;
+  caption?: string;
   sourceUrl?: string;
+};
+
+export type WebChatMessage = {
+  id: string;
+  role: "assistant" | "staff" | "user";
+  text: string;
+  images: WebChatImage[];
+  createdAt: string;
 };
 
 export type WebChatReply = {
   answer: string;
   images: WebChatImage[];
+};
+
+export type WebImageUpload = {
+  uploadId: string;
+  image: WebChatImage;
 };
 
 export class WebChatError extends Error {
@@ -62,6 +75,7 @@ export async function sendWebChat(
   sessionToken: string,
   message: string,
   pageContext: string,
+  uploadId = "",
 ): Promise<WebChatReply> {
   const response = await fetch(`${WORKER_URL}/api/web-chat`, {
     method: "POST",
@@ -72,6 +86,7 @@ export async function sendWebChat(
     body: JSON.stringify({
       message,
       pageContext: pageContext.slice(0, 160),
+      ...(uploadId ? { uploadId } : {}),
     }),
   });
   const data = await readJson<Partial<WebChatReply>>(response);
@@ -82,13 +97,66 @@ export async function sendWebChat(
   };
 }
 
+export async function uploadWebImage(
+  sessionToken: string,
+  blob: Blob,
+): Promise<WebImageUpload> {
+  const response = await fetch(`${WORKER_URL}/api/web-upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+      "Content-Type": blob.type,
+    },
+    body: blob,
+  });
+  const data = await readJson<Partial<WebImageUpload>>(response);
+  if (!data.uploadId || !data.image?.url || !data.image.alt) {
+    throw new WebChatError(502, "INVALID_UPLOAD_RESPONSE");
+  }
+  return data as WebImageUpload;
+}
+
+export async function loadWebHistory(sessionToken: string): Promise<WebChatMessage[]> {
+  const response = await fetch(`${WORKER_URL}/api/web-history`, {
+    headers: { Authorization: `Bearer ${sessionToken}` },
+  });
+  const data = await readJson<{
+    conversation?: { messages?: Partial<WebChatMessage>[] } | null;
+  }>(response);
+  if (!Array.isArray(data.conversation?.messages)) return [];
+  return data.conversation.messages.slice(-100).flatMap((message) => {
+    const role = message.role;
+    if (role !== "assistant" && role !== "staff" && role !== "user") return [];
+    const text = String(message.text ?? "").slice(0, 4_000);
+    const images = Array.isArray(message.images) ? message.images.slice(0, 4) : [];
+    if (!text && !images.length) return [];
+    return [{
+      id: String(message.id ?? `history-${crypto.randomUUID()}`),
+      role,
+      text,
+      images,
+      createdAt: String(message.createdAt ?? ""),
+    }];
+  });
+}
+
+export async function deleteWebHistory(sessionToken: string): Promise<void> {
+  const response = await fetch(`${WORKER_URL}/api/web-history`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${sessionToken}` },
+  });
+  if (!response.ok) {
+    throw new WebChatError(response.status, "DELETE_HISTORY_FAILED");
+  }
+}
+
 export function saveWebSession(session: WebSession) {
-  window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
 }
 
 export function loadWebSession(): WebSession | null {
   try {
-    const raw = window.sessionStorage.getItem(SESSION_KEY);
+    const raw = window.localStorage.getItem(SESSION_KEY);
     const session = raw ? JSON.parse(raw) as WebSession : null;
     if (
       !session?.sessionToken
@@ -106,5 +174,5 @@ export function loadWebSession(): WebSession | null {
 }
 
 export function clearWebSession() {
-  window.sessionStorage.removeItem(SESSION_KEY);
+  window.localStorage.removeItem(SESSION_KEY);
 }

@@ -2,6 +2,7 @@
 
 import {
   Bot,
+  ImagePlus,
   LogOut,
   MessageCircle,
   Minimize2,
@@ -9,21 +10,28 @@ import {
   User,
   X,
 } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import { BrandLogo } from "./components/BrandLogo";
+import {
+  prepareChatImage,
+  type PreparedChatImage,
+} from "./lib/dst-image-upload";
 import {
   clearWebSession,
   createGuestSession,
+  deleteWebHistory,
+  loadWebHistory,
   loadWebSession,
   saveWebSession,
   sendWebChat,
+  uploadWebImage,
   WebChatError,
   type WebChatImage,
   type WebSession,
 } from "./lib/dst-web-chat";
 
 type ChatMessage = {
-  id: number;
+  id: string;
   role: "assistant" | "user";
   text: string;
   images?: WebChatImage[];
@@ -46,7 +54,7 @@ function safeHttpsUrl(value: string) {
 }
 
 function welcomeMessage(): ChatMessage {
-  return { id: 0, role: "assistant", text: WELCOME };
+  return { id: "welcome", role: "assistant", text: WELCOME };
 }
 
 type DstWebChatProps = {
@@ -58,19 +66,54 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
   const [session, setSession] = useState<WebSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [pendingImage, setPendingImage] = useState<PreparedChatImage | null>(null);
+  const [imageBusy, setImageBusy] = useState(false);
   const [sessionBusy, setSessionBusy] = useState(false);
+  const [historyBusy, setHistoryBusy] = useState(false);
   const [sendBusy, setSendBusy] = useState(false);
   const [error, setError] = useState("");
   const nextId = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => () => {
+    if (pendingImage?.previewUrl) URL.revokeObjectURL(pendingImage.previewUrl);
+  }, [pendingImage]);
 
   useEffect(() => {
-    const restoreTimer = window.setTimeout(() => {
+    let active = true;
+    const restoreTimer = window.setTimeout(async () => {
       const restored = loadWebSession();
+      if (!active || !restored) return;
       setSession(restored);
-      if (restored) setMessages([welcomeMessage()]);
+      setHistoryBusy(true);
+      try {
+        const history = await loadWebHistory(restored.sessionToken);
+        if (!active) return;
+        setMessages(history.length ? history.map((message) => ({
+          id: message.id,
+          role: message.role === "user" ? "user" : "assistant",
+          text: message.text,
+          images: message.images.filter((image) => safeHttpsUrl(image.url)),
+        })) : [welcomeMessage()]);
+      } catch (requestError) {
+        if (!active) return;
+        if (requestError instanceof WebChatError && requestError.status === 401) {
+          clearWebSession();
+          setSession(null);
+          setMessages([]);
+        } else {
+          setMessages([welcomeMessage()]);
+          setError("Chưa tải được lịch sử cũ, nhưng anh/chị vẫn có thể tiếp tục chat.");
+        }
+      } finally {
+        if (active) setHistoryBusy(false);
+      }
     }, 0);
-    return () => window.clearTimeout(restoreTimer);
+    return () => {
+      active = false;
+      window.clearTimeout(restoreTimer);
+    };
   }, []);
 
   useEffect(() => {
@@ -95,12 +138,14 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
     images: WebChatImage[] = [],
   ) {
     nextId.current += 1;
+    const id = `local-${nextId.current}`;
     setMessages((current) => [...current, {
-      id: nextId.current,
+      id,
       role,
       text,
       ...(images.length ? { images } : {}),
     }]);
+    return id;
   }
 
   async function startChat() {
@@ -128,47 +173,96 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
     }
   }
 
-  function endChat() {
-    try {
-      clearWebSession();
-    } catch {
-      // State is still cleared when browser storage is unavailable.
-    }
-    setSession(null);
-    setMessages([]);
-    setInput("");
+  async function endChat() {
+    if (!session || !window.confirm("Xóa toàn bộ cuộc trò chuyện này?")) return;
+    setSessionBusy(true);
     setError("");
+    try {
+      await deleteWebHistory(session.sessionToken);
+      clearWebSession();
+      setSession(null);
+      setMessages([]);
+      setInput("");
+      setPendingImage(null);
+    } catch (requestError) {
+      if (requestError instanceof WebChatError && requestError.status === 401) {
+        clearWebSession();
+        setSession(null);
+        setMessages([]);
+      } else {
+        setError("Chưa thể xóa cuộc trò chuyện. Anh/chị vui lòng thử lại.");
+      }
+    } finally {
+      setSessionBusy(false);
+    }
   }
 
   async function submitQuestion(raw: string) {
     const question = raw.trim();
-    if (!session || !question || sendBusy) return;
-    append("user", question);
-    setInput("");
+    const selectedImage = pendingImage;
+    if (!session || (!question && !selectedImage) || sendBusy || imageBusy) return;
     setError("");
     setSendBusy(true);
+    let optimisticId = "";
     try {
+      const uploaded = selectedImage
+        ? await uploadWebImage(session.sessionToken, selectedImage.blob)
+        : null;
+      optimisticId = append(
+        "user",
+        question,
+        uploaded ? [uploaded.image] : [],
+      );
       const reply = await sendWebChat(
         session.sessionToken,
         question,
         window.location.pathname,
+        uploaded?.uploadId,
       );
+      setInput("");
+      setPendingImage(null);
       append(
         "assistant",
         reply.answer,
         reply.images.filter((image) => safeHttpsUrl(image.url)),
       );
     } catch (requestError) {
+      if (optimisticId) {
+        setMessages((current) => current.filter(({ id }) => id !== optimisticId));
+      }
       if (requestError instanceof WebChatError && requestError.status === 401) {
-        endChat();
+        clearWebSession();
+        setSession(null);
+        setMessages([]);
+        setPendingImage(null);
         setError("Phiên tư vấn đã hết hạn. Anh/chị vui lòng kết nối lại.");
       } else if (requestError instanceof WebChatError && requestError.status === 429) {
         setError("Anh/chị đang gửi quá nhanh. Vui lòng chờ một phút rồi thử lại.");
+      } else if (requestError instanceof WebChatError && requestError.status === 413) {
+        setError("Ảnh vẫn còn quá lớn. Anh/chị vui lòng chọn ảnh khác.");
       } else {
-        setError("Kết nối tư vấn đang gián đoạn. Anh/chị vui lòng thử lại.");
+        setError("Chưa gửi được nội dung. Ảnh và câu hỏi vẫn được giữ để anh/chị thử lại.");
       }
     } finally {
       setSendBusy(false);
+    }
+  }
+
+  async function selectImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = "";
+    if (!file || imageBusy || sendBusy) return;
+    setImageBusy(true);
+    setError("");
+    try {
+      setPendingImage(await prepareChatImage(file));
+    } catch (imageError) {
+      const code = imageError instanceof Error ? imageError.message : "";
+      setError(code === "SOURCE_IMAGE_TOO_LARGE"
+        ? "Ảnh gốc quá lớn. Anh/chị vui lòng chọn ảnh dưới 15 MB."
+        : "Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP hợp lệ.");
+    } finally {
+      setImageBusy(false);
     }
   }
 
@@ -209,7 +303,7 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
               <Bot size={42} aria-hidden="true" />
               <h2>Tư vấn cùng DST Group</h2>
               <p>
-                Chat trực tiếp trên website, không cần tài khoản. Trợ lý sử dụng cùng dữ liệu tư vấn với bot Messenger của DST.
+                Chat trực tiếp trên website, không cần tài khoản. Lịch sử được giữ trên trình duyệt này trong 30 ngày.
               </p>
               <button type="button" onClick={() => void startChat()} disabled={sessionBusy}>
                 <MessageCircle size={18} aria-hidden="true" />
@@ -227,24 +321,32 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
                   <small>Đang tư vấn với</small>
                   <strong>{session.profile.name}</strong>
                 </span>
-                <button type="button" onClick={endChat} title="Kết thúc phiên chat">
-                  <LogOut size={17} aria-hidden="true" /> Kết thúc
+                <button
+                  type="button"
+                  onClick={() => void endChat()}
+                  disabled={sessionBusy}
+                  title="Xóa cuộc trò chuyện"
+                >
+                  <LogOut size={17} aria-hidden="true" /> Xóa cuộc trò chuyện
                 </button>
               </div>
               <div className="web-chat-messages" ref={scrollRef} aria-live="polite">
+                {historyBusy ? (
+                  <div className="web-chat-typing" role="status">Đang tải lịch sử…</div>
+                ) : null}
                 {messages.map((message) => (
                   <article className={`web-chat-message ${message.role}`} key={message.id}>
                     {message.role === "assistant" ? (
                       <span className="web-chat-message-avatar"><BrandLogo /></span>
                     ) : null}
                     <div>
-                      <p>{message.text}</p>
+                      {message.text ? <p>{message.text}</p> : null}
                       {message.images?.length ? (
                         <div className="web-chat-images" aria-label="Ảnh tư vấn phù hợp">
                           {message.images.map((image) => (
-                            <figure key={image.id}>
+                            <figure key={image.id ?? image.url}>
                               <img src={image.url} alt={image.alt} loading="lazy" />
-                              <figcaption>{image.caption}</figcaption>
+                              {image.caption ? <figcaption>{image.caption}</figcaption> : null}
                               {image.sourceUrl && safeHttpsUrl(image.sourceUrl) ? (
                                 <a href={image.sourceUrl} target="_blank" rel="noreferrer">
                                   Xem nguồn ảnh
@@ -276,8 +378,44 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
                   </button>
                 ))}
               </div>
+              {pendingImage ? (
+                <div className="web-chat-attachment-preview" aria-label="Ảnh đính kèm">
+                  <img src={pendingImage.previewUrl} alt={pendingImage.alt} />
+                  <span>
+                    <strong>Ảnh đã chọn</strong>
+                    <small>{pendingImage.originalName}</small>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPendingImage(null)}
+                    aria-label="Xóa ảnh đã chọn"
+                  >
+                    <X size={16} aria-hidden="true" />
+                  </button>
+                </div>
+              ) : null}
               <form className="web-chat-input" onSubmit={onSubmit}>
                 <input
+                  ref={fileInputRef}
+                  className="web-chat-file-input"
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                  onChange={(event) => void selectImage(event)}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
+                <button
+                  className="web-chat-attach"
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sendBusy || imageBusy}
+                  aria-label="Chọn ảnh gửi cho trợ lý"
+                  title="Gửi ảnh để trợ lý phân tích"
+                >
+                  <ImagePlus size={19} aria-hidden="true" />
+                </button>
+                <input
+                  className="web-chat-text"
                   value={input}
                   maxLength={800}
                   onChange={(event) => setInput(event.target.value)}
@@ -285,8 +423,9 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
                   placeholder="Nhập câu hỏi…"
                 />
                 <button
+                  className="web-chat-send"
                   type="submit"
-                  disabled={!input.trim() || sendBusy}
+                  disabled={(!input.trim() && !pendingImage) || sendBusy || imageBusy}
                   aria-label="Gửi câu hỏi"
                 >
                   <Send size={18} aria-hidden="true" />
