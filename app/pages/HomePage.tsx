@@ -1,9 +1,10 @@
-import { ArrowRight, ClipboardCheck, Lightbulb, MessageCircle, ShieldCheck, Star, Users } from "lucide-react";
+import { ArrowRight, ClipboardCheck, Lightbulb, ShieldCheck, Star, Users } from "lucide-react";
 import { clientPartners, companyStats, testimonials } from "../../data/company";
 import { processSteps } from "../../data/home";
 import { projects } from "../../data/projects";
 import { services } from "../../data/services";
 import { AppLink } from "../components/AppLink";
+import { BrandLogo } from "../components/BrandLogo";
 import { CTASection } from "../components/CTASection";
 import { ProjectCard } from "../components/ProjectCard";
 import { Reveal } from "../components/Reveal";
@@ -33,26 +34,20 @@ export function HomePage({ onNavigate, onOpenChat }: PageProps) {
             <p>DST Group đồng hành cùng doanh nghiệp từ chiến lược, nội dung, quảng cáo đến Media và Branding. Mỗi kế hoạch hướng đến sự rõ ràng, khả năng phối hợp và tối ưu theo từng giai đoạn.</p>
             <div className="hero-actions">
               <AppLink className="primary-btn" to="/dich-vu" onNavigate={onNavigate}>Khám phá dịch vụ <ArrowRight size={17} aria-hidden="true" /></AppLink>
-              <button className="ghost-btn" type="button" onClick={onOpenChat}><MessageCircle size={17} aria-hidden="true" />Chat tư vấn</button>
+              <AppLink className="ghost-btn" to="/lien-he" onNavigate={onNavigate}>Nhận tư vấn</AppLink>
             </div>
             <div className="hero-capabilities">ADS • TIKTOK SHOP • DESIGN • MEDIA • CONTENT • BRANDING</div>
           </Reveal>
-          <Reveal className="hero-project-sheet">
-            <div className="hero-project-sheet-heading">
-              <span>Dự án tuyển chọn</span>
-              <AppLink to="/du-an" onNavigate={onNavigate}>Xem tất cả <ArrowRight size={15} aria-hidden="true" /></AppLink>
+          <Reveal className="hero-brand-stage">
+            <span className="brand-line brand-line-one" aria-hidden="true" />
+            <span className="brand-line brand-line-two" aria-hidden="true" />
+            <span className="brand-orbit brand-orbit-one" aria-hidden="true" />
+            <span className="brand-orbit brand-orbit-two" aria-hidden="true" />
+            <div className="hero-brand-card-motion">
+              <div className="hero-brand-logo"><BrandLogo variant="media" priority /></div>
             </div>
-            <div className="hero-project-sheet-grid">
-              {projects.slice(0, 3).map((project, index) => (
-                <AppLink className={`hero-project hero-project-${index + 1}`} key={project.slug} to={`/du-an/${project.slug}`} onNavigate={onNavigate}>
-                  {project.image ? <img src={assetPath(project.image)} alt={project.imageAlt || project.title} decoding="async" /> : <span className="hero-project-fallback" aria-hidden="true" />}
-                  <span className="hero-project-overlay" aria-hidden="true" />
-                  <span className="hero-project-industry">{project.industryLabel}</span>
-                  <strong>{project.title}</strong>
-                </AppLink>
-              ))}
-            </div>
-            <p>Nhìn từ dự án thực tế để lựa chọn dịch vụ và cách phối hợp phù hợp.</p>
+            <span className="brand-tag tag-top">ADS</span>
+            <span className="brand-tag tag-bottom">BRANDING</span>
           </Reveal>
         </div>
       </section>
@@ -68,11 +63,6 @@ export function HomePage({ onNavigate, onOpenChat }: PageProps) {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="section page-width project-proof-section">
-        <Reveal><SectionHeading eyebrow="Dự án nổi bật" title="Một số hướng triển khai theo nhu cầu thực tế" description="Thông tin định lượng và tên khách hàng được giữ ở mức cần xác nhận để tránh công bố dữ liệu chưa được phê duyệt." action={<AppLink className="text-link" to="/du-an" onNavigate={onNavigate}>Xem dự án <ArrowRight size={16} aria-hidden="true" /></AppLink>} /></Reveal>
-        <div className="project-grid">{projects.slice(0, 3).map((project) => <Reveal key={project.slug}><ProjectCard project={project} onNavigate={onNavigate} /></Reveal>)}</div>
       </section>
 
       <section className="section page-width intro-split">
@@ -103,6 +93,11 @@ export function HomePage({ onNavigate, onOpenChat }: PageProps) {
       <section className="section page-width">
         <Reveal><SectionHeading eyebrow="Quy trình làm việc" title="Rõ ràng từ trao đổi đến bàn giao" /></Reveal>
         <ol className="process-grid">{processSteps.map((step, index) => <Reveal key={step.title}><li><span>{String(index + 1).padStart(2, "0")}</span><h3>{step.title}</h3><p>{step.text}</p></li></Reveal>)}</ol>
+      </section>
+
+      <section className="section page-width">
+        <Reveal><SectionHeading eyebrow="Dự án tiêu biểu" title="Một số hướng triển khai theo nhu cầu thực tế" description="Thông tin định lượng và tên khách hàng được giữ ở mức cần xác nhận để tránh công bố dữ liệu chưa được phê duyệt." action={<AppLink className="text-link" to="/du-an" onNavigate={onNavigate}>Xem dự án <ArrowRight size={16} aria-hidden="true" /></AppLink>} /></Reveal>
+        <div className="project-grid">{projects.slice(0, 3).map((project) => <Reveal key={project.slug}><ProjectCard project={project} onNavigate={onNavigate} /></Reveal>)}</div>
       </section>
 
       <section className="section impact-section">

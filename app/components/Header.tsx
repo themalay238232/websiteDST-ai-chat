@@ -38,7 +38,6 @@ export function Header({ currentPath, onNavigate }: HeaderProps) {
     <header className="site-header" data-testid="site-header">
       <AppLink className="brand" to="/" onNavigate={navigate} aria-label="Về trang chủ DST Group">
         <BrandLogo priority />
-        <span className="header-brand-note">Marketing · Media · Branding</span>
       </AppLink>
 
       <nav className="desktop-nav" aria-label="Menu chính">

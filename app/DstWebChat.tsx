@@ -286,7 +286,6 @@ export function DstWebChat({ open, onOpenChange }: DstWebChatProps) {
               <span>
                 <strong>DST Group</strong>
                 <small><i /> Đang hoạt động</small>
-                <span className="web-chat-service-line">Trợ lý tư vấn trực tuyến</span>
               </span>
             </div>
             <div className="web-chat-actions">
